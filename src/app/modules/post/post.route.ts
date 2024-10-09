@@ -9,6 +9,8 @@ router.put("/upvotes/:id", PostControllers.updateUpvotes);
 
 router.put("/downvotes/:id", PostControllers.updateDownvotes);
 
+router.put("/update/:id", PostControllers.updatePost);
+
 
 
 export const PostRouters = router;

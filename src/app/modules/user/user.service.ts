@@ -71,9 +71,10 @@ const updateUserFollowersIntoDB = async (id: string,payload: Record<string, unkn
       }
     }
 
-const updateUserFolloweringIntoDB = async (id: string,payload: Record<string, unknown>) => {
-  const userId = new mongoose.Types.ObjectId(id as string);
-  const followingId = new mongoose.Types.ObjectId(payload.followering as string);
+const updateUserFolloweringIntoDB = async (payload: IUser) => {
+  console.log({payload})
+  const userId = new mongoose.Types.ObjectId(payload._id);
+  const followingId = new mongoose.Types.ObjectId(payload.following);
   
   const user = await User.findById(userId);
   const followingUser = await User.findById(followingId);

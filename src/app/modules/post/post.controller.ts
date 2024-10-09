@@ -15,7 +15,7 @@ const createPost = catchAsync(async (req, res) => {
     })
   })
 const updateUpvotes = catchAsync(async (req, res) => {
-    const {id} = req.params
+  const {id} = req.params
     const result = await PostServices.updateUpvotesIntoDB(id)
   
     sendResponse(res, {
@@ -36,9 +36,20 @@ const updateDownvotes = catchAsync(async (req, res) => {
         data: result
     })
   })
+const updatePost = catchAsync(async (req, res) => {
+    const result = await PostServices.updatePostIntoDB(req.body)
+  
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Downvotes update successfully',
+        data: result
+    })
+  })
 
   export const PostControllers = {
     createPost,
     updateUpvotes,
-    updateDownvotes
+    updateDownvotes,
+    updatePost
   }

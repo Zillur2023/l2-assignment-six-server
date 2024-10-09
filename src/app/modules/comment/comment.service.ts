@@ -1,0 +1,53 @@
+import httpStatus from "http-status";
+import AppError from "../../errors/AppError";
+import Post from "../post/post.model";
+import { IComment } from "./comment.interface";
+import Comment from "./comment.model";
+import { User } from "../user/user.model";
+
+const createCommentIntoDB = async (payload: IComment) => {
+  const post = await Post.findById(payload.postId);
+
+  if (!post) {
+    throw new AppError(httpStatus.NOT_FOUND, "Post not found");
+  }
+  const user = await User.findById(payload.userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const result = await Comment.create(payload);
+
+  return result;
+};
+
+const updateCommentIntoDB = async (payload: IComment) => {
+    const result = await Comment.findByIdAndUpdate(
+        payload._id,
+        { $set: payload }, // Use $set to specify the fields to update
+        {
+          new: true, // Return the updated document
+          runValidators: true, // Ensure validation rules are followed
+        }
+      );
+    
+      if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "Comment not found");
+      }
+};
+const deleteCommentIntoDB = async (payload: IComment) => {
+    const result = await Comment.findByIdAndDelete(payload._id);
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Comment not found");
+  }
+
+  return result;
+};
+
+export const CommentServices = {
+  createCommentIntoDB,
+  updateCommentIntoDB,
+  deleteCommentIntoDB
+};

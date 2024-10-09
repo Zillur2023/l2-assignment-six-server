@@ -46,8 +46,23 @@ const updateDownvotesIntoDB = async (id: string) => {
   return await post.save();
 };
 
+const updatePostIntoDB = async (payload:IPost) => {
+  const result = await Post.findByIdAndUpdate(payload._id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Post not found");
+  }
+
+  return result;
+};
+
 export const PostServices = {
   createPostIntoDB,
   updateUpvotesIntoDB,
   updateDownvotesIntoDB,
+  updatePostIntoDB
+  
 };

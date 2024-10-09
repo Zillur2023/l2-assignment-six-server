@@ -75,8 +75,8 @@ const updateFollowers = catchAsync(async (req, res) => {
   });
 });
 const updateFollowing = catchAsync(async (req, res) => {
-  const {id} = req.params
-  const result = await UserServices.updateUserFolloweringIntoDB(id,req.body);
+  // const {id} = req.params
+  const result = await UserServices.updateUserFolloweringIntoDB(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
