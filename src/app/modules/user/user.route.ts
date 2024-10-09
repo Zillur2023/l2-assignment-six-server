@@ -2,6 +2,17 @@ import { Router } from "express";
 import { UserControllers } from "./user.controller";
 
 const router = Router()
+// router.post(
+//     '/create-student',
+//     // auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+//     upload.single('file'),
+//     (req: Request, res: Response, next: NextFunction) => {
+//       req.body = JSON.parse(req.body.data);
+//       next();
+//     },
+//     validateRequest(createStudentValidationSchema),
+//     UserControllers.createStudent,
+//   );
 
 router.post('/create', UserControllers.createUser)
 router.get('/allUser', UserControllers.getAllUser)
