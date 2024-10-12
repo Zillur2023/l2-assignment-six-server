@@ -14,6 +14,17 @@ const createComment = catchAsync(async (req, res) => {
         data: result
     })
   })
+const getAllComment = catchAsync(async (req, res) => {
+    const {postId} = req.params
+    const result = await CommentServices.getAllCommentFromDB(postId)
+  
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Get all comment successfully',
+        data: result
+    })
+  })
 const updateComment = catchAsync(async (req, res) => {
     const result = await CommentServices.updateCommentIntoDB(req.body)
   
@@ -37,6 +48,7 @@ const deleteComment = catchAsync(async (req, res) => {
 
   export const CommentControllers = {
     createComment,
+    getAllComment,
     updateComment,
     deleteComment
   }

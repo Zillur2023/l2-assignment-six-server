@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types } from "mongoose";
 
 export interface IPost {
   _id?: string;
@@ -7,9 +7,10 @@ export interface IPost {
   category: string;
   isPremium?: boolean; // Optional because it has a default value
   imageUrl?: string; // Optional
-  upvotes?: number;     // Optional, defaults to 0
-  downvotes?: number;   // Optional, defaults to 0
-  voteScore?: number;   // Optional, defaults to 0
+  upvotes?: Types.ObjectId[]; // Optional, defaults to 0
+  downvotes?: Types.ObjectId[]; // Optional, defaults to 0
+  voteScore?: number; // Optional, defaults to 0
+  comments?: Types.ObjectId;
   author: Types.ObjectId; // References the User model
   createdAt?: Date; // Automatically handled by Mongoose timestamps
   updatedAt?: Date; // Automatically handled by Mongoose timestamps

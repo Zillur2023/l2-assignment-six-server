@@ -3,7 +3,9 @@ import { CommentControllers } from "./comment.controller";
 
 const router = Router()
 
-router.post('/create/:postId', CommentControllers.createComment)
+router.post('/create', CommentControllers.createComment)
+
+router.get('/all-comment/:postId', CommentControllers.getAllComment)
 
 router.put('/update/:id', CommentControllers.updateComment)
 

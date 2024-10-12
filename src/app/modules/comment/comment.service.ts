@@ -17,10 +17,25 @@ const createCommentIntoDB = async (payload: IComment) => {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const result = await Comment.create(payload);
+  const comment = await Comment.create(payload);
 
-  return result;
+  if (user && post) {
+    // Add the upvote
+    await Post.findByIdAndUpdate(
+      payload.postId,
+      { $addToSet: { comments:  comment?._id} },
+      { new: true }
+    );
+  }
+
+  return await Comment.find();
 };
+
+const getAllCommentFromDB = async (postId:string) => {
+  const result = await Comment.find({postId}).populate("userId") 
+  
+  return result
+}
 
 const updateCommentIntoDB = async (payload: IComment) => {
     const result = await Comment.findByIdAndUpdate(
@@ -48,6 +63,7 @@ const deleteCommentIntoDB = async (payload: IComment) => {
 
 export const CommentServices = {
   createCommentIntoDB,
+  getAllCommentFromDB,
   updateCommentIntoDB,
   deleteCommentIntoDB
 };
