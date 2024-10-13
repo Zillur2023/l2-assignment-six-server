@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UserControllers } from "./user.controller";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router()
 // router.post(
@@ -14,7 +15,7 @@ const router = Router()
 //     UserControllers.createStudent,
 //   );
 
-router.post('/create', UserControllers.createUser)
+router.post('/create', multerUpload.single("image"), UserControllers.createUser)
 
 router.get('/allUser', UserControllers.getAllUser)
 
@@ -27,6 +28,8 @@ router.put("/update/:id", UserControllers.updateUser);
 router.put("/followers/:id", UserControllers.updateFollowers);
 
 router.put("/following/:id", UserControllers.updateFollowing);
+
+router.put("/isVerified/:id", UserControllers.updateVeirfied);
 
 
 

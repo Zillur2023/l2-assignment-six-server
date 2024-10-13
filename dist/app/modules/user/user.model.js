@@ -24,7 +24,7 @@ exports.userSchema = new mongoose_1.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     bio: { type: String },
-    profilePicture: { type: String },
+    image: { type: String },
     followers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
     isVerified: { type: Boolean, default: false },
@@ -37,7 +37,16 @@ exports.userSchema = new mongoose_1.Schema(
     status: {
         type: String,
         enum: ["in-progress", "blocked"],
-        default: "in-progress",
+        // default: "in-progress",
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["Pending", "Paid", "Failed"],
+        // default: "Pending"
+    },
+    transactionId: {
+        type: String,
+        //  default: ""
     },
     isDeleted: {
         type: Boolean,

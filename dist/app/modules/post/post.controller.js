@@ -26,9 +26,21 @@ const createPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result
     });
 }));
+const getAllPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params; // Retrieve id from URL parameters
+    console.log({ id });
+    const result = yield post_service_1.PostServices.getAllPostFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Get all post successfully',
+        data: result
+    });
+}));
 const updateUpvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield post_service_1.PostServices.updateUpvotesIntoDB(id);
+    const { userId, postId } = req.body;
+    const result = yield post_service_1.PostServices.updateUpvotesIntoDB(userId, postId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -38,7 +50,8 @@ const updateUpvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 }));
 const updateDownvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield post_service_1.PostServices.updateDownvotesIntoDB(id);
+    const { userId, postId } = req.body;
+    const result = yield post_service_1.PostServices.updateDownvotesIntoDB(userId, postId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -46,8 +59,30 @@ const updateDownvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result
     });
 }));
+const updatePost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield post_service_1.PostServices.updatePostIntoDB(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Downvotes update successfully',
+        data: result
+    });
+}));
+const updateComment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, postId } = req.body;
+    const result = yield post_service_1.PostServices.updateCommentIntoDB(userId, postId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Comment update successfully',
+        data: result
+    });
+}));
 exports.PostControllers = {
     createPost,
+    getAllPost,
     updateUpvotes,
-    updateDownvotes
+    updateDownvotes,
+    updatePost,
+    updateComment
 };

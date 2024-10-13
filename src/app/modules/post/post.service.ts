@@ -20,9 +20,9 @@ const createPostIntoDB = async (payload: IPost) => {
 const getAllPostFromDB = async (id?: string) => {
   let result;
   if (id) {
-    result = await Post.find({ _id:id }).populate("comments");
+    result = await Post.find({ _id:id }).populate("author").populate("comments");
   } else {
-    result = await Post.find().populate("comments");
+    result = await Post.find().populate("author").populate("comments");
   }
 
   return result;

@@ -7,9 +7,10 @@ const PostSchema = new mongoose_1.Schema({
     category: { type: String, required: true },
     isPremium: { type: Boolean, default: false },
     imageUrl: { type: String },
-    upvotes: { type: Number, default: 0 },
-    downvotes: { type: Number, default: 0 },
+    upvotes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
+    downvotes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
     voteScore: { type: Number, default: 0 },
+    comments: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Comment", default: [] }],
     author: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 const Post = (0, mongoose_1.model)("Post", PostSchema);

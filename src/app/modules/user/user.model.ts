@@ -11,7 +11,7 @@ export const userSchema = new Schema<IUser, IUserModel>(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     bio: { type: String },
-    profilePicture: { type: String },
+    image: { type: String },
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     isVerified: { type: Boolean, default: false },
@@ -24,8 +24,17 @@ export const userSchema = new Schema<IUser, IUserModel>(
     status: {
       type: String,
       enum: ["in-progress", "blocked"],
-      default: "in-progress",
+      // default: "in-progress",
     },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      // default: "Pending"
+    },
+    transactionId: { 
+      type: String,
+      //  default: ""
+      },
     isDeleted: {
       type: Boolean,
       default: false,

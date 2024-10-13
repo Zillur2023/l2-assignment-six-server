@@ -9,8 +9,8 @@ const handleValidationError_1 = __importDefault(require("../errors/handleValidat
 const handleCastError_1 = __importDefault(require("../errors/handleCastError"));
 const handleCuplicateError_1 = __importDefault(require("../errors/handleCuplicateError"));
 const AppError_1 = __importDefault(require("../errors/AppError"));
+// const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
 const globalErrorHandler = (err, req, res, next) => {
-    // const globalErrorHandler = (err:any, req:Request, res:Response, next:NextFunction) => {
     let statusCode = 400;
     let message = err.message || 'Something went wrong!';
     let errorMessages = [

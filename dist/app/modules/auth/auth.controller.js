@@ -21,12 +21,18 @@ const auth_service_1 = require("./auth.service");
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield auth_service_1.AuthServices.loginUser(req.body);
     const { user, refreshToken, accessToken } = result;
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('accessToken', accessToken, {
         secure: config_1.default.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: true,
         maxAge: 1000 * 60 * 60 * 24 * 365,
     });
+    // res.cookie('refreshToken', refreshToken, {
+    //   secure: config.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   sameSite: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 365,
+    // });
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

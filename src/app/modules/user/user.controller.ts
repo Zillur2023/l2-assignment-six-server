@@ -7,7 +7,10 @@ const createUser = catchAsync(async (req, res) => {
   // const { password, student: studentData } = req.body;
   // console.log('createUser',req.body)
 
-  const result = await UserServices.createUserIntoDB(req.body);
+  const result = await UserServices.createUserIntoDB({
+    ...JSON.parse(req.body.data),
+    image: req.file?.path
+  });
   // console.log({result})
 
   sendResponse(res, {
@@ -85,6 +88,18 @@ const updateFollowing = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const updateVeirfied = catchAsync(async (req, res) => {
+  const {id} = req.params
+  console.log({id})
+  const result = await UserServices.updateVerifiedIntoDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Verified update successfully',
+    data: result,
+  });
+});
 
 export const UserControllers = {
   createUser,
@@ -93,5 +108,6 @@ export const UserControllers = {
    getUserById,
    updateUser,
    updateFollowers,
-   updateFollowing
+   updateFollowing,
+   updateVeirfied,
 }

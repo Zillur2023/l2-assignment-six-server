@@ -1,8 +1,8 @@
 import { join } from "path";
 import { verifyPayment } from "./payment.utils";
 import { readFileSync } from "fs";
-import Booking from "../booking/booking.model";
 import config from "../../config";
+import { User } from "../user/user.model";
 
 // Helper function to read the HTML template safely
 const readTemplate = (filePath: string): string => {
@@ -15,21 +15,26 @@ const readTemplate = (filePath: string): string => {
 };
 
 // Main function to handle payment processing and template rendering
-const createPaymentIntoDB = async (transactionId: string, status: string): Promise<string> => {
-  let message: string;
+const createPaymentIntoDB = async (id: string, transactionId:string, status: string): Promise<string> => {
+  console.log("createPaymentIntoDB-->id",id,transactionId)
+    let message: string;
   let statusClass: string;
 
   try {
       // Verify payment status
       const verifyResponse = await verifyPayment(transactionId);
+      console.log({verifyResponse})
 
       if (verifyResponse && verifyResponse.pay_status === "Successful") {
           // Update booking status
-          await Booking.findOneAndUpdate(
-              { transactionId },
+          await User.findByIdAndUpdate(
+              id ,
               {
+                  isVerified: true,
+                  transactionId,
                   paymentStatus: "Paid",
-              }
+              },
+              {new: true}
           );
           message = "Successfully Paid!";
           statusClass = "message-success"; // Success class
@@ -40,7 +45,9 @@ const createPaymentIntoDB = async (transactionId: string, status: string): Promi
 
       // Load the HTML template
       const filePath = join(__dirname, '../../../views/confirmation.html');
+    //   console.log({filePath})
       let template = readTemplate(filePath);
+    //   console.log({template})
 
       // Replace placeholders in the HTML template
       template = template.replace('{{message}}', message);

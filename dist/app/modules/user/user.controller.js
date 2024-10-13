@@ -20,7 +20,8 @@ const user_service_1 = require("./user.service");
 const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const { password, student: studentData } = req.body;
     // console.log('createUser',req.body)
-    const result = yield user_service_1.UserServices.createUserIntoDB(req.body);
+    var _a;
+    const result = yield user_service_1.UserServices.createUserIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
     // console.log({result})
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -89,6 +90,17 @@ const updateFollowing = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const updateVeirfied = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    console.log({ id });
+    const result = yield user_service_1.UserServices.updateVerifiedIntoDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Verified update successfully',
+        data: result,
+    });
+}));
 exports.UserControllers = {
     createUser,
     getAllUser,
@@ -96,5 +108,6 @@ exports.UserControllers = {
     getUserById,
     updateUser,
     updateFollowers,
-    updateFollowing
+    updateFollowing,
+    updateVeirfied,
 };

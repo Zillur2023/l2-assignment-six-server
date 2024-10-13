@@ -4,8 +4,12 @@ import { User } from "./user.model";
 import { IUser } from "./user.interface";
 import { stringify } from "querystring";
 import mongoose from "mongoose";
+import Post from "../post/post.model";
+import { emitWarning } from "process";
+import { initiatePayment } from "../payment/payment.utils";
 
-const createUserIntoDB = async (payload: Pick<IUser, 'name' | 'email' | 'password'>) => {
+// const createUserIntoDB = async (payload: Pick<IUser, 'name' | 'email' | 'password'>) => {
+const createUserIntoDB = async (payload: IUser) => {
   
   // checking if the user is exist
   const isUserExist = await User.isUserExistsByEmail(payload.email);
@@ -101,6 +105,36 @@ const updateUserFolloweringIntoDB = async (id: string,payload: IUser) => {
 
 }
 
+const updateVerifiedIntoDB = async (id:string) => {
+    const user = await User.findById(id)
+
+    if(!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User not found")
+    }
+    const upvotes = await Post.find({author:id, $expr: { $gt: [{ $size: "$upvotes" }, 0] }} )
+
+    if(!upvotes) {
+      throw new AppError(httpStatus.NOT_FOUND, "This user have no upvote in his post")
+    }
+
+    const transactionId = `TXN-${Date.now()}`;
+  
+    // const result = await User.findByIdAndUpdate(id, {transactionId, paymentStatus:'paid'},{ new: true })
+
+    const paymentData = {
+        id: user?._id,
+        transactionId,
+        price: 100,
+        name: user?.name,
+        email: user?.email,
+    }
+
+    const paymentSession = await initiatePayment(paymentData)
+
+    // return result
+    return {paymentSession}
+}
+
 
 export const UserServices = {
   createUserIntoDB,
@@ -109,5 +143,6 @@ export const UserServices = {
   getUserByIdFromDB,
   updateUserIntoDB,
   updateUserFollowersIntoDB,
-  updateUserFolloweringIntoDB
+  updateUserFolloweringIntoDB,
+  updateVerifiedIntoDB
 };

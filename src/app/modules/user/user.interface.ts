@@ -10,12 +10,14 @@ export interface IUser {
   email: string;
   password: string;
   bio?: string;
-  profilePicture?: string;
+  image?: string;
   followers: Types.ObjectId[]; // Array of ObjectIds referencing 'User'
   following: Types.ObjectId[]; // Array of ObjectIds referencing 'User'
   isVerified: boolean;
   role: 'admin' | 'user'; // Role can be either 'admin' or 'user'
   status: "in-progress" | "blocked";
+  paymentStatus?: 'Pending' | 'Paid' | 'Failed';
+  transactionId?: string;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;

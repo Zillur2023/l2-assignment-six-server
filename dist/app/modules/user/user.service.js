@@ -17,6 +17,9 @@ const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = require("./user.model");
 const mongoose_1 = __importDefault(require("mongoose"));
+const post_model_1 = __importDefault(require("../post/post.model"));
+const payment_utils_1 = require("../payment/payment.utils");
+// const createUserIntoDB = async (payload: Pick<IUser, 'name' | 'email' | 'password'>) => {
 const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     // checking if the user is exist
     const isUserExist = yield user_model_1.User.isUserExistsByEmail(payload.email);
@@ -68,8 +71,9 @@ const updateUserFollowersIntoDB = (id, payload) => __awaiter(void 0, void 0, voi
     }
 });
 const updateUserFolloweringIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = new mongoose_1.default.Types.ObjectId(id);
-    const followingId = new mongoose_1.default.Types.ObjectId(payload.followering);
+    console.log({ payload });
+    const userId = new mongoose_1.default.Types.ObjectId(payload._id);
+    const followingId = new mongoose_1.default.Types.ObjectId(id);
     const user = yield user_model_1.User.findById(userId);
     const followingUser = yield user_model_1.User.findById(followingId);
     if (!user)
@@ -90,6 +94,28 @@ const updateUserFolloweringIntoDB = (id, payload) => __awaiter(void 0, void 0, v
         yield followingUser.save();
     }
 });
+const updateVerifiedIntoDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id);
+    if (!user) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
+    }
+    const upvotes = yield post_model_1.default.find({ author: id, $expr: { $gt: [{ $size: "$upvotes" }, 0] } });
+    if (!upvotes) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user have no upvote in his post");
+    }
+    const transactionId = `TXN-${Date.now()}`;
+    // const result = await User.findByIdAndUpdate(id, {transactionId, paymentStatus:'paid'},{ new: true })
+    const paymentData = {
+        id: user === null || user === void 0 ? void 0 : user._id,
+        transactionId,
+        price: 100,
+        name: user === null || user === void 0 ? void 0 : user.name,
+        email: user === null || user === void 0 ? void 0 : user.email,
+    };
+    const paymentSession = yield (0, payment_utils_1.initiatePayment)(paymentData);
+    // return result
+    return { paymentSession };
+});
 exports.UserServices = {
     createUserIntoDB,
     getAllUserFromDB,
@@ -97,5 +123,6 @@ exports.UserServices = {
     getUserByIdFromDB,
     updateUserIntoDB,
     updateUserFollowersIntoDB,
-    updateUserFolloweringIntoDB
+    updateUserFolloweringIntoDB,
+    updateVerifiedIntoDB
 };
