@@ -20,8 +20,9 @@ router.post('/create', multer_config_1.multerUpload.single("image"), user_contro
 router.get('/allUser', user_controller_1.UserControllers.getAllUser);
 router.get('/:email', user_controller_1.UserControllers.getUser);
 router.get('/:id', user_controller_1.UserControllers.getUserById);
-router.put("/update/:id", user_controller_1.UserControllers.updateUser);
+router.put("/update-profile", multer_config_1.multerUpload.single("image"), user_controller_1.UserControllers.updateUserProfile);
 router.put("/followers/:id", user_controller_1.UserControllers.updateFollowers);
-router.put("/following/:id", user_controller_1.UserControllers.updateFollowing);
-router.put("/isVerified/:id", user_controller_1.UserControllers.updateVeirfied);
+router.put("/update-follow-unfollow/:id", user_controller_1.UserControllers.updateFollowAndUnfollow);
+// router.get("/isAvailable-verified/:id", UserControllers.isAvailableForVerified);
+router.put("/update-verified/:id", user_controller_1.UserControllers.updateVeirfied);
 exports.UserRouters = router;

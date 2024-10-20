@@ -16,14 +16,12 @@ const readTemplate = (filePath: string): string => {
 
 // Main function to handle payment processing and template rendering
 const createPaymentIntoDB = async (id: string, transactionId:string, status: string): Promise<string> => {
-  console.log("createPaymentIntoDB-->id",id,transactionId)
     let message: string;
   let statusClass: string;
 
   try {
       // Verify payment status
       const verifyResponse = await verifyPayment(transactionId);
-      console.log({verifyResponse})
 
       if (verifyResponse && verifyResponse.pay_status === "Successful") {
           // Update booking status
@@ -45,9 +43,7 @@ const createPaymentIntoDB = async (id: string, transactionId:string, status: str
 
       // Load the HTML template
       const filePath = join(__dirname, '../../../views/confirmation.html');
-    //   console.log({filePath})
       let template = readTemplate(filePath);
-    //   console.log({template})
 
       // Replace placeholders in the HTML template
       template = template.replace('{{message}}', message);

@@ -23,14 +23,15 @@ router.get('/:email', UserControllers.getUser)
 
 router.get('/:id', UserControllers.getUserById)
 
-router.put("/update/:id", UserControllers.updateUser);
+router.put("/update-profile", multerUpload.single("image"), UserControllers.updateUserProfile);
 
 router.put("/followers/:id", UserControllers.updateFollowers);
 
-router.put("/following/:id", UserControllers.updateFollowing);
+router.put("/update-follow-unfollow/:id", UserControllers.updateFollowAndUnfollow);
 
-router.put("/isVerified/:id", UserControllers.updateVeirfied);
+// router.get("/isAvailable-verified/:id", UserControllers.isAvailableForVerified);
 
+router.put("/update-verified/:id", UserControllers.updateVeirfied);
 
 
 export const UserRouters = router;

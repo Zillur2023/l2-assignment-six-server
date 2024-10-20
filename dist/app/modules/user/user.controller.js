@@ -59,9 +59,10 @@ const getUserById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
         data: result
     });
 }));
-const updateUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUserProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     // console.log('userBody', req.body)
-    const result = yield user_service_1.UserServices.updateUserIntoDB(req.body);
+    const result = yield user_service_1.UserServices.updateUserProfileIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
     // console.log('userResult', result)
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -80,13 +81,26 @@ const updateFollowers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
-const updateFollowing = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateFollowAndUnfollow = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield user_service_1.UserServices.updateUserFolloweringIntoDB(id, req.body);
+    // console.log({id})
+    // console.log("req.body",req.body)
+    const result = yield user_service_1.UserServices.updateFollowAndUnfollowIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'Following is updated successfully',
+        data: result,
+    });
+}));
+const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    // console.log({id})
+    const result = yield user_service_1.UserServices.isAvailableForVerifiedIntoDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Available for verified successfully',
         data: result,
     });
 }));
@@ -106,8 +120,9 @@ exports.UserControllers = {
     getAllUser,
     getUser,
     getUserById,
-    updateUser,
+    updateUserProfile,
     updateFollowers,
-    updateFollowing,
+    updateFollowAndUnfollow,
+    isAvailableForVerified,
     updateVeirfied,
 };

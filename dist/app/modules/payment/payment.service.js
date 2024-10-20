@@ -30,13 +30,11 @@ const readTemplate = (filePath) => {
 };
 // Main function to handle payment processing and template rendering
 const createPaymentIntoDB = (id, transactionId, status) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("createPaymentIntoDB-->id", id, transactionId);
     let message;
     let statusClass;
     try {
         // Verify payment status
         const verifyResponse = yield (0, payment_utils_1.verifyPayment)(transactionId);
-        console.log({ verifyResponse });
         if (verifyResponse && verifyResponse.pay_status === "Successful") {
             // Update booking status
             yield user_model_1.User.findByIdAndUpdate(id, {
@@ -53,9 +51,7 @@ const createPaymentIntoDB = (id, transactionId, status) => __awaiter(void 0, voi
         }
         // Load the HTML template
         const filePath = (0, path_1.join)(__dirname, '../../../views/confirmation.html');
-        //   console.log({filePath})
         let template = readTemplate(filePath);
-        //   console.log({template})
         // Replace placeholders in the HTML template
         template = template.replace('{{message}}', message);
         template = template.replace('{{status}}', statusClass); // Add status class

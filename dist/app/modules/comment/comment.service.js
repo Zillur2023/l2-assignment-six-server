@@ -48,8 +48,8 @@ const updateCommentIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Comment not found");
     }
 });
-const deleteCommentIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield comment_model_1.default.findByIdAndDelete(payload._id);
+const deleteCommentIntoDB = (commentId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield comment_model_1.default.findByIdAndDelete(commentId);
     if (!result) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Comment not found");
     }

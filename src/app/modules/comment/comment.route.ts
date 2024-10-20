@@ -9,6 +9,6 @@ router.get('/all-comment/:postId', CommentControllers.getAllComment)
 
 router.put('/update/:id', CommentControllers.updateComment)
 
-router.put('/delete/:id', CommentControllers.deleteComment)
+router.delete('/delete/:commentId', CommentControllers.deleteComment)
 
 export const CommentRouters = router;

@@ -18,7 +18,8 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const post_service_1 = require("./post.service");
 const createPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield post_service_1.PostServices.createPostIntoDB(req.body);
+    var _a;
+    const result = yield post_service_1.PostServices.createPostIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -27,14 +28,14 @@ const createPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     });
 }));
 const getAllPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params; // Retrieve id from URL parameters
-    console.log({ id });
-    const result = yield post_service_1.PostServices.getAllPostFromDB(id);
+    const { postId, userId } = req.params; // Retrieve ids from URL parameters
+    // Retrieve posts based on postId or userId
+    const result = yield post_service_1.PostServices.getAllPostFromDB(postId, userId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Get all post successfully',
-        data: result
+        message: 'Get all posts successfully',
+        data: result,
     });
 }));
 const updateUpvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60,11 +61,12 @@ const updateDownvotes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
     });
 }));
 const updatePost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield post_service_1.PostServices.updatePostIntoDB(req.body);
+    var _a;
+    const result = yield post_service_1.PostServices.updatePostIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Downvotes update successfully',
+        message: 'Post update successfully',
         data: result
     });
 }));
@@ -78,11 +80,34 @@ const updateComment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
         data: result
     });
 }));
+const deletePost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { postId } = req.params;
+    const result = yield post_service_1.PostServices.deletePostFromDB(postId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Post deleted successfully',
+        data: result
+    });
+}));
+const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield post_service_1.PostServices.isAvailableForVerifiedIntoDB(id);
+    // console.log("isAvailableForVerified --result",result)
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Available for verified successfully',
+        data: result,
+    });
+}));
 exports.PostControllers = {
     createPost,
     getAllPost,
     updateUpvotes,
     updateDownvotes,
     updatePost,
-    updateComment
+    updateComment,
+    deletePost,
+    isAvailableForVerified
 };

@@ -6,7 +6,7 @@ export interface IPost {
   content: string;
   category: string;
   isPremium?: boolean; // Optional because it has a default value
-  imageUrl?: string; // Optional
+  image?: string; // Optional
   upvotes?: Types.ObjectId[]; // Optional, defaults to 0
   downvotes?: Types.ObjectId[]; // Optional, defaults to 0
   voteScore?: number; // Optional, defaults to 0

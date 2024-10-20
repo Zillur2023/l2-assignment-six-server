@@ -36,7 +36,8 @@ const updateComment = catchAsync(async (req, res) => {
     })
   })
 const deleteComment = catchAsync(async (req, res) => {
-    const result = await CommentServices.deleteCommentIntoDB(req.body)
+   const {commentId} = req.params
+    const result = await CommentServices.deleteCommentIntoDB(commentId)
   
     sendResponse(res, {
         statusCode: httpStatus.OK,

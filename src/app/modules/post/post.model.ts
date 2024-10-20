@@ -7,7 +7,7 @@ const PostSchema = new Schema<IPost>(
     content: { type: String, required: true },
     category: { type: String, required: true },
     isPremium: { type: Boolean, default: false },
-    imageUrl: { type: String },
+    image: { type: String },
     upvotes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     downvotes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     voteScore: { type: Number, default: 0 },
