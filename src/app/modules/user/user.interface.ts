@@ -9,6 +9,8 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  needsPasswordChange: boolean;
+  passwordChangedAt?: Date;
   bio?: string;
   image?: string;
   followers: Types.ObjectId[]; // Array of ObjectIds referencing 'User'
@@ -25,8 +27,6 @@ export interface IUser {
 
 
 export interface IUserModel extends Model<IUser> {
-  //instance methods for checking if the user exist
-  isUserExistsByEmail(id: string): Promise<IUser>;
   //instance methods for checking if passwords are matched
   isPasswordMatched(
     plainTextPassword: string,

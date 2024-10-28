@@ -30,7 +30,28 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     return result;
 });
 const getAllUserFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.find();
+    const result = yield user_model_1.User.aggregate([
+        {
+            $addFields: {
+                followers: { $size: "$followers" }, // Replace the followers array with the count of followers
+                following: { $size: "$following" }, // Replace the following array with the count of following
+            },
+        },
+        {
+            $project: {
+                _id: 1, // Include _id
+                name: 1, // Include name
+                email: 1, // Include email
+                image: 1, // Include image
+                followers: 1, // Include followers (now the count)
+                following: 1, // Include following (now the count)
+                isVerified: 1, // Include verification status
+                role: 1, // Include role
+                paymentStatus: 1, // Include payment status
+                transactionId: 1, // Include transaction ID
+            },
+        },
+    ]);
     return result;
 });
 const getUserFromDB = (email) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,7 +63,6 @@ const getUserByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* ()
     return result;
 });
 const updateUserProfileIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log({payload})
     const user = yield user_model_1.User.findByIdAndUpdate(payload._id, payload, {
         new: true,
         runValidators: true,
@@ -72,7 +92,6 @@ const updateUserFollowersIntoDB = (id, payload) => __awaiter(void 0, void 0, voi
     }
 });
 const updateFollowAndUnfollowIntoDB = (targetUserId, currentUser) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log({currentUser})
     const session = yield mongoose_1.default.startSession();
     session.startTransaction();
     try {
@@ -163,7 +182,6 @@ exports.UserServices = {
     updateVerifiedIntoDB
 };
 // const updateFollowAndUnfollowIndoDB = async (id: string,payload: IUser) => {
-//   console.log({payload})
 //   const userId = new mongoose.Types.ObjectId(payload._id);
 //   const followingId = new mongoose.Types.ObjectId(id);
 //   const user = await User.findById(userId);
@@ -179,7 +197,6 @@ exports.UserServices = {
 //         user.following = user.following.filter(
 //           (followeringId) => !followeringId.equals(followingId)
 //         );  
-//         console.log('user.following',user.following)
 //         followingUser.followers = followingUser.followers.filter(
 //           (followerId) => !followerId.equals(userId)
 //         );  

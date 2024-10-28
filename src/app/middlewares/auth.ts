@@ -1,72 +1,82 @@
-// import AppError from "../errors/AppError";
-// import catchAsync from "../utils/catchAsync";
-// import config from "../config";
-// import { NextFunction, Request, Response } from "express";
-// import httpStatus from "http-status";
-// import jwt, { JwtPayload } from 'jsonwebtoken';
-// import { User } from "../modules/user/user.model";
-// import { IUserRole } from "../modules/user/user.interface";
+import httpStatus from 'http-status';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import config from '../config';
+import AppError from '../errors/AppError';
+// import { TUserRole } from '../modules/User/user.interface';
+// import { User } from '../modules/User/user.model';
+import catchAsync from '../utils/catchAsync';
+import { User } from '../modules/user/user.model';
+import { TUserRole } from '../modules/user/user.constant';
 
-// const auth = (...requiredRoles: IUserRole[]) => {
-//   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-//     // Token can be passed via Authorization header or cookies
-//     let token = req.headers.authorization;
-//     // let token = req.cookies.refreshToken;
+const auth = (...requiredRoles: TUserRole[]) => {
+  return catchAsync(async (req, res, next) => {
+    const token = req.headers.authorization;
 
-//     // Handle Bearer token in the Authorization header
-//     if (token && token.startsWith("Bearer ")) {
-//       token = token.split(" ")[1]; // Extract token after "Bearer"
-//     } else if (req.cookies && req.cookies.refreshToken) {
-//       // Fallback: check if token is present in cookies
-//       token = req.cookies.refreshToken;
-//     } else {
-//       throw new AppError(httpStatus.UNAUTHORIZED, "Authorization token missing.");
-//     }
+    // checking if the token is missing
+    if (!token) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
+    }
 
-//     let decoded;
+    let decoded
 
-//     try {
-//       // Verify the token
-//       // decoded = jwt.verify(token as string, config.jwt_access_secret as string) as JwtPayload;
-//       decoded = jwt.verify(token as string, config.jwt_refresh_secret as string) as JwtPayload;
-//     } catch (error) {
-//       throw new AppError(httpStatus.UNAUTHORIZED, "UNAUTHORIZED");
-//     }
+    // checking if the given token is valid
+    // const decoded = jwt.verify(
+    //   token,
+    //   config.jwt_access_secret as string,
+    // ) as JwtPayload;
 
-//     const { role, email, iat } = decoded;
+    try {
+       decoded = jwt.verify(
+        token,
+        config.jwt_access_secret as string,
+      ) as JwtPayload;
+    } catch (error) {
+      throw new AppError ( httpStatus.UNAUTHORIZED, 'Unauthorized' )
+    }
 
-//     // Check if the user exists in the system
-//     const user = await User.isUserExistsByEmail(email);
-//     if (!user) {
-//       throw new AppError(httpStatus.NOT_FOUND, "User not found.");
-//     }
+    const { role, email, iat } = decoded;
 
-//     // Check if the user has been deleted
-//     if (user.isDeleted) {
-//       throw new AppError(httpStatus.FORBIDDEN, "This user account has been deleted.");
-//     }
+    // checking if the user is exist
+    const user = await User.findOne({email});
 
-//     // Check if the user is blocked
-//     if (user.status === 'blocked') {
-//       throw new AppError(httpStatus.FORBIDDEN, "This user account is blocked.");
-//     }
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
+    }
+    // checking if the user is already deleted
 
-//     // Check if the JWT was issued before the password was changed
-//     if (user.passwordChangedAt && User.isJWTIssuedBeforePasswordChanged(user.passwordChangedAt, iat as number)) {
-//       throw new AppError(httpStatus.UNAUTHORIZED, "Token is invalid due to a recent password change.");
-//     }
+    const isDeleted = user?.isDeleted;
 
-//     // Check if the user's role matches the required roles
-//     if (requiredRoles.length > 0 && !requiredRoles.includes(role as IUserRole)) {
-//       throw new AppError(httpStatus.FORBIDDEN, "You do not have the necessary permissions to access this resource.");
-//     }
+    if (isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
+    }
 
-//     // Attach the user information to the request for further use
-//     req.user = { ...decoded, role }; // Add role explicitly for convenience
+    // checking if the user is blocked
+    const userStatus = user?.status;
 
-//     // Proceed to the next middleware or route handler
-//     next();
-//   });
-// };
+    if (userStatus === 'blocked') {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked ! !');
+    }
 
-// export default auth;
+    if (
+      user.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        user.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+    }
+
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not authorized  hi!',
+      );
+    }
+
+    req.user = decoded as JwtPayload & { role: string };
+    next();
+  });
+};
+
+export default auth;

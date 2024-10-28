@@ -26,7 +26,28 @@ const createUserIntoDB = async (payload: IUser) => {
 };
 
 const getAllUserFromDB = async () => {
-  const result = await User.find();
+  const result = await User.aggregate([
+    {
+      $addFields: {
+        followers: { $size: "$followers" },  // Replace the followers array with the count of followers
+        following: { $size: "$following" },  // Replace the following array with the count of following
+      },
+    },
+    {
+      $project: {
+        _id: 1,           // Include _id
+        name: 1,          // Include name
+        email: 1,         // Include email
+        image: 1,         // Include image
+        followers: 1,     // Include followers (now the count)
+        following: 1,     // Include following (now the count)
+        isVerified: 1,    // Include verification status
+        role: 1,          // Include role
+        paymentStatus: 1, // Include payment status
+        transactionId: 1, // Include transaction ID
+      },
+    },
+  ]);
 
   return result;
 };
@@ -205,7 +226,6 @@ export const UserServices = {
 
 
 // const updateFollowAndUnfollowIndoDB = async (id: string,payload: IUser) => {
-//   console.log({payload})
 //   const userId = new mongoose.Types.ObjectId(payload._id);
 //   const followingId = new mongoose.Types.ObjectId(id);
   
@@ -224,7 +244,6 @@ export const UserServices = {
 //         user.following = user.following.filter(
 //           (followeringId) => !followeringId.equals(followingId)
 //         );  
-//         console.log('user.following',user.following)
 //         followingUser.followers = followingUser.followers.filter(
 //           (followerId) => !followerId.equals(userId)
 //         );  

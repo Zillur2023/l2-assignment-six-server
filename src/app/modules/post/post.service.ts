@@ -56,6 +56,7 @@ const getAllPostFromDB = async (
     $addFields: {
       upvoteCount: { $size: "$upvotes" }, // Calculate upvote count
       downvoteCount: { $size: "$downvotes" }, // Calculate downvote count
+      commentCount: { $size: "$comments" }
     },
   });
 

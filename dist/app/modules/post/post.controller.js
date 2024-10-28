@@ -28,13 +28,15 @@ const createPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     });
 }));
 const getAllPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { postId, userId } = req.params; // Retrieve ids from URL parameters
-    // Retrieve posts based on postId or userId
-    const result = yield post_service_1.PostServices.getAllPostFromDB(postId, userId);
+    const { postId, userId } = req.params;
+    const { searchTerm, category, sortBy } = req.query;
+    // Fetch posts from the database using the params and query parameters
+    const result = yield post_service_1.PostServices.getAllPostFromDB(postId, userId, searchTerm, category, sortBy);
+    // Send response back to the client
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Get all posts successfully',
+        message: 'Posts fetched successfully',
         data: result,
     });
 }));
@@ -93,7 +95,6 @@ const deletePost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield post_service_1.PostServices.isAvailableForVerifiedIntoDB(id);
-    // console.log("isAvailableForVerified --result",result)
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -111,3 +112,14 @@ exports.PostControllers = {
     deletePost,
     isAvailableForVerified
 };
+// const getAllPost = catchAsync(async (req, res) => {
+//   const { postId, userId } = req.params as { postId?: string; userId?: string }; // Retrieve ids from URL parameters
+//   // Retrieve posts based on postId or userId
+//   const result = await PostServices.getAllPostFromDB(postId, userId);
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Get all posts successfully',
+//     data: result,
+//   });
+// });
