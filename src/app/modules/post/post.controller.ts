@@ -23,7 +23,6 @@ const createPost = catchAsync(async (req, res) => {
       postId?: string;
       userId?: string;
     };
-    console.log({postId})
   
     const { searchTerm, category, sortBy } = req.query as {
       searchTerm?: string;

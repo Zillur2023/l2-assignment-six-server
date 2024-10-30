@@ -18,11 +18,8 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const user_service_1 = require("./user.service");
 const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // const { password, student: studentData } = req.body;
-    // console.log('createUser',req.body)
     var _a;
     const result = yield user_service_1.UserServices.createUserIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
-    // console.log({result})
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -61,9 +58,7 @@ const getUserById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
 }));
 const updateUserProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    // console.log('userBody', req.body)
     const result = yield user_service_1.UserServices.updateUserProfileIntoDB(Object.assign(Object.assign({}, JSON.parse(req.body.data)), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path }));
-    // console.log('userResult', result)
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -83,8 +78,6 @@ const updateFollowers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
 }));
 const updateFollowAndUnfollow = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    // console.log({id})
-    // console.log("req.body",req.body)
     const result = yield user_service_1.UserServices.updateFollowAndUnfollowIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -95,7 +88,6 @@ const updateFollowAndUnfollow = (0, catchAsync_1.default)((req, res) => __awaite
 }));
 const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    // console.log({id})
     const result = yield user_service_1.UserServices.isAvailableForVerifiedIntoDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -106,7 +98,6 @@ const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter
 }));
 const updateVeirfied = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    console.log({ id });
     const result = yield user_service_1.UserServices.updateVerifiedIntoDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

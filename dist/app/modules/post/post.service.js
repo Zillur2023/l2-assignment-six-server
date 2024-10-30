@@ -19,42 +19,112 @@ const user_model_1 = require("../user/user.model");
 const post_model_1 = __importDefault(require("./post.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const createPostIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log({payload})
-    // console.log("{ payload.author }",payload.author);
     const user = yield user_model_1.User.findById(payload.author);
-    // console.log({ user });
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
     }
     const result = yield post_model_1.default.create(payload);
     return result;
 });
-const getAllPostFromDB = (postId, userId) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy) => __awaiter(void 0, void 0, void 0, function* () {
     let result;
+    // Initialize the aggregation pipeline
+    const pipeline = [];
+    // If postId is provided, fetch the specific post
     if (postId) {
-        // If postId is provided, fetch the specific post
-        result = yield post_model_1.default.find({ _id: postId })
-            .populate("author")
-            .populate("upvotes")
-            .populate("downvotes")
-            .populate("comments");
+        pipeline.push({ $match: { _id: new mongoose_1.default.Types.ObjectId(postId) } });
+        // await Post.find({_id: postId})
     }
     else if (userId) {
         // If userId is provided, fetch posts by that user
-        result = yield post_model_1.default.find({ author: userId })
-            .populate("author")
-            .populate("upvotes")
-            .populate("downvotes")
-            .populate("comments");
+        pipeline.push({ $match: { author: new mongoose_1.default.Types.ObjectId(userId) } });
     }
     else {
-        // If neither postId nor userId is provided, fetch all posts
-        result = yield post_model_1.default.find()
-            .populate("author")
-            .populate("upvotes")
-            .populate("downvotes")
-            .populate("comments");
+        // If searchTerm is provided, search by title (case-insensitive)
+        if (searchTerm) {
+            pipeline.push({
+                $match: { title: { $regex: searchTerm, $options: "i" } }, // 'i' for case-insensitive
+            });
+        }
+        // If category is provided, filter by category
+        if (category) {
+            pipeline.push({
+                $match: { category: category },
+            });
+        }
     }
+    // Add fields to calculate the count of upvotes and downvotes
+    pipeline.push({
+        $addFields: {
+            upvoteCount: { $size: "$upvotes" }, // Calculate upvote count
+            downvoteCount: { $size: "$downvotes" }, // Calculate downvote count
+            commentCount: { $size: "$comments" }
+        },
+    });
+    // Perform lookups for populating author, upvotes, downvotes, and comments
+    pipeline.push({
+        $lookup: {
+            from: "users", // Collection name for authors
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+        },
+    }, {
+        $unwind: {
+            path: "$author", // Unwind author array to get author object
+            preserveNullAndEmptyArrays: true // Allow posts without an author to be returned
+        }
+    }, {
+        $lookup: {
+            from: "users", // Collection name for upvotes
+            localField: "upvotes",
+            foreignField: "_id",
+            as: "upvotes",
+        },
+    }, {
+        $lookup: {
+            from: "users", // Collection name for downvotes
+            localField: "downvotes",
+            foreignField: "_id",
+            as: "downvotes",
+        },
+    }, {
+        $lookup: {
+            from: "comments", // Collection name for comments
+            localField: "comments",
+            foreignField: "_id",
+            as: "comments",
+        },
+    });
+    // Sorting options based on the sortBy parameter
+    if (sortBy) {
+        let sortOption = {};
+        switch (sortBy) {
+            case "highestUpvotes":
+                sortOption = { upvoteCount: -1 }; // Sort by most upvotes (descending)
+                break;
+            case "lowestUpvotes":
+                sortOption = { upvoteCount: 1 }; // Sort by least upvotes (ascending)
+                break;
+            case "highestDownvotes":
+                sortOption = { downvoteCount: -1 }; // Sort by most downvotes (descending)
+                break;
+            case "lowestDownvotes":
+                sortOption = { downvoteCount: 1 }; // Sort by least downvotes (ascending)
+                break;
+            default:
+                sortOption = { upvoteCount: -1 }; // Default sorting
+                break;
+        }
+        // Add sort stage to the pipeline
+        pipeline.push({ $sort: sortOption });
+    }
+    else {
+        // Default sorting by most upvotes if no sortBy is specified
+        pipeline.push({ $sort: { upvoteCount: -1 } });
+    }
+    // Execute the aggregation pipeline
+    result = yield post_model_1.default.aggregate(pipeline).exec();
     return result;
 });
 const updateUpvotesIntoDB = (userId, postId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -179,10 +249,8 @@ const deletePostFromDB = (postId) => __awaiter(void 0, void 0, void 0, function*
 //     // $expr: { $gt: [{ $size: "$upvotes" }, 0] },
 //     // upvotes: { $elemMatch: { $eq: user._id } } 
 //   }).select("upvotes");
-//   console.log({postsWithUserUpvoted})
 //     // Flatten the upvotes from all posts into a single array
 //     const allUpvotes = postsWithUserUpvoted.flatMap((post) => post.upvotes);
-//     console.log({ allUpvotes }); // For debugging purposes
 //   // If there are more than 1 post where the user has been upvoted, return true
 //   // if (postsWithUserUpvoted.length > 1) {
 //   //   return true;
@@ -217,7 +285,6 @@ const isAvailableForVerifiedIntoDB = (id) => __awaiter(void 0, void 0, void 0, f
     const userUpvotes = postsWithUserUpvoted
         .flatMap(post => post.upvotes) // Flatten upvotes from all posts
         .filter(upvote => !(upvote === null || upvote === void 0 ? void 0 : upvote.equals(user._id))); // Filter for the user's upvotes
-    console.log({ userUpvotes });
     return userUpvotes;
 });
 exports.PostServices = {
@@ -230,3 +297,29 @@ exports.PostServices = {
     deletePostFromDB,
     isAvailableForVerifiedIntoDB
 };
+// const getAllPostFromDB = async (postId?: string, userId?: string) => {
+//   let result;
+//   if (postId) {
+//     // If postId is provided, fetch the specific post
+//     result = await Post.find({ _id: postId })
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   } else if (userId) {
+//     // If userId is provided, fetch posts by that user
+//     result = await Post.find({ author: userId })
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   } else {
+//     // If neither postId nor userId is provided, fetch all posts
+//     result = await Post.find()
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   }
+//   return result;
+// };
