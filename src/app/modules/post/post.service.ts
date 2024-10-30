@@ -16,6 +16,31 @@ const createPostIntoDB = async (payload: IPost) => {
   return result;
 };
 
+const deleteUnassociatedPosts = async () => {
+  try {
+    // Step 1: Get all user IDs and all post IDs
+    const allUserIds = await User.find().select('_id').lean(); // Get all user IDs
+    const allPostIds = await Post.find().select('_id author').lean(); // Get all post IDs with their authors
+
+    // Extract user IDs from the array of user objects
+    const userIds = allUserIds.map(user => user._id.toString()); // Convert ObjectId to string for comparison
+
+    // Step 2: Filter posts that do not have an associated user ID
+    const postIdsToDelete = allPostIds
+      .filter(post => !userIds.includes(post.author.toString())) // Keep posts without a valid user
+      .map(post => post._id); // Get the IDs of those posts
+
+    // Step 3: Delete the unassociated posts
+    if (postIdsToDelete.length > 0) {
+      await Post.deleteMany({ _id: { $in: postIdsToDelete } });
+      console.log(`Deleted ${postIdsToDelete.length} posts without associated users.`);
+    } else {
+      console.log('No posts to delete.');
+    }
+  } catch (error) {
+    console.error('Error deleting unassociated posts:', error);
+  }
+};
 
 const getAllPostFromDB = async (
   postId?: string, 
@@ -24,6 +49,9 @@ const getAllPostFromDB = async (
   category?: string,
   sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
 ) => {
+  await deleteUnassociatedPosts(); // Delete posts without associated users
+
+
   let result;
 
   // Initialize the aggregation pipeline
