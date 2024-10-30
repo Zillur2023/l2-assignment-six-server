@@ -53,7 +53,6 @@ const getAllPostFromDB = async (
 
 
   let result;
-  const update= zillur
 
   // Initialize the aggregation pipeline
   const pipeline: any[] = [];

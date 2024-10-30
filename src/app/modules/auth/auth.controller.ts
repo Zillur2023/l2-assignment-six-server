@@ -60,13 +60,8 @@ const loginUser = catchAsync(async (req, res) => {
   });
   
   const forgetPassword = catchAsync(async (req, res) => {
-<<<<<<< HEAD
     // const {email} = req.body;
     const result = await AuthServices.forgetPassword(req.body);
-=======
-    const {email} = req.body;
-    const result = await AuthServices.forgetPassword(email);
->>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -76,7 +71,6 @@ const loginUser = catchAsync(async (req, res) => {
   });
   
   const resetPassword = catchAsync(async (req, res) => {
-<<<<<<< HEAD
     // const token = req.headers.authorization;
     //  console.log('resetPassword controller',token)
     // if (!token) {
@@ -84,15 +78,6 @@ const loginUser = catchAsync(async (req, res) => {
     // }
   
     const result = await AuthServices.resetPassword(req.body);
-=======
-    const token = req.headers.authorization;
-  
-    if (!token) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Something went wrong !');
-    }
-  
-    const result = await AuthServices.resetPassword(req.body, token);
->>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
