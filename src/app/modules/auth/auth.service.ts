@@ -4,7 +4,11 @@ import { createToken, verifyToken } from "./auth.utils";
 import config from "../../config";
 import { User } from "../user/user.model";
 import { ILoginUser } from "./auth.interface";
+<<<<<<< HEAD
 import jwt,{ JwtPayload } from "jsonwebtoken";
+=======
+import jwt, { JwtPayload } from 'jsonwebtoken';
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 import bcrypt from 'bcrypt';
 import { sendEmail } from "../../utils/sendEmail";
 
@@ -111,7 +115,11 @@ const changePassword = async (
 
   await User.findOneAndUpdate(
     {
+<<<<<<< HEAD
       id: userData.userId,
+=======
+      email: userData.email,
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
       role: userData.role,
     },
     {
@@ -131,7 +139,11 @@ const refreshToken = async (token: string) => {
   const { email, iat } = decoded;
 
   // checking if the user is exist
+<<<<<<< HEAD
   const user = await User.findOne(email);
+=======
+  const user = await User.findOne({email});
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -173,10 +185,16 @@ const refreshToken = async (token: string) => {
   };
 };
 
+<<<<<<< HEAD
 const forgetPassword = async (payload: any) => {
   // checking if the user is exist
   // console.log({payload})
   const user = await User.findOne({email: payload?.email});
+=======
+const forgetPassword = async (email: string) => {
+  // checking if the user is exist
+  const user = await User.findOne({email});
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -196,10 +214,15 @@ const forgetPassword = async (payload: any) => {
   }
 
   const jwtPayload = {
+<<<<<<< HEAD
     // userId: user.id,
     // _id: isUserExist._id,
     email: user?.email,
     role: user?.role,
+=======
+    email: user.email,
+    role: user.role,
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
   };
 
   const resetToken = createToken(
@@ -208,6 +231,7 @@ const forgetPassword = async (payload: any) => {
     '10m',
   );
 
+<<<<<<< HEAD
   console.log({resetToken})
 
   // const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
@@ -231,6 +255,21 @@ const resetPassword = async (
   console.log("resetPassword payload  ", payload)
   // checking if the user is exist
   const user = await User.findOne({email: payload?.email});
+=======
+  const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
+
+  sendEmail(user.email, resetUILink);
+
+  console.log(resetUILink);
+};
+
+const resetPassword = async (
+  payload: { id: string; newPassword: string },
+  token: string,
+) => {
+  // checking if the user is exist
+  const user = await User.findById(payload?.id);
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -250,14 +289,23 @@ const resetPassword = async (
   }
 
   const decoded = jwt.verify(
+<<<<<<< HEAD
     payload?.token,
+=======
+    token,
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
 
+<<<<<<< HEAD
   if (payload?.email !== decoded?.email) {
     console.log(payload?.email, decoded?.email);
+=======
+  if (payload.id !== decoded.userId) {
+    console.log(payload.id, decoded.userId);
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
     throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!');
   }
 
@@ -269,7 +317,11 @@ const resetPassword = async (
 
   await User.findOneAndUpdate(
     {
+<<<<<<< HEAD
       email: decoded.email,
+=======
+      id: decoded.userId,
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
       role: decoded.role,
     },
     {
@@ -279,6 +331,10 @@ const resetPassword = async (
     },
   );
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 export const AuthServices = {
   loginUser,
   changePassword,

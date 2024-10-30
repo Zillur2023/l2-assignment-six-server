@@ -10,6 +10,13 @@ export const userSchema = new Schema<IUser, IUserModel>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    needsPasswordChange: {
+      type: Boolean,
+      default: true,
+    },
+    passwordChangedAt: {
+      type: Date,
+    },
     bio: { type: String },
     image: { type: String },
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
@@ -31,10 +38,10 @@ export const userSchema = new Schema<IUser, IUserModel>(
       enum: ["Pending", "Paid", "Failed"],
       // default: "Pending"
     },
-    transactionId: { 
+    transactionId: {
       type: String,
       //  default: ""
-      },
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -59,7 +66,10 @@ userSchema.post("save", function (doc, next) {
   next();
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword,
   hashedPassword

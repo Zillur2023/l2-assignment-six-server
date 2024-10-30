@@ -5,4 +5,4 @@ const router = Router()
 
 router.post('/confirmation', paymentControllers.createPayment)
 
-export const PaymentRoutes = router
+export const PaymentRouters = router

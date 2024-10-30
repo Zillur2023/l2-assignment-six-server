@@ -1,10 +1,15 @@
 import { Router } from "express";
 import { AuthControllers } from "./auth.controller";
+import auth from "../../middlewares/auth";
+import { USER_ROLE } from "../user/user.constant";
+import validateRequest from "../../middlewares/validateRequest";
+import { AuthValidation } from "./auth.validation";
 
 const router = Router();
 
 router.post("/login", AuthControllers.loginUser);
 
+<<<<<<< HEAD
 router.post("/change-password", AuthControllers.changePassword);
 
 router.post("/refresh-token", AuthControllers.refreshToken);
@@ -12,5 +17,35 @@ router.post("/refresh-token", AuthControllers.refreshToken);
 router.post("/forget-password", AuthControllers.forgetPassword);
 
 router.post("/reset-password", AuthControllers.resetPassword);
+=======
+router.post(
+    '/change-password',
+    auth(
+      USER_ROLE.admin,
+      USER_ROLE.user,
+     
+    ),
+    validateRequest(AuthValidation.changePasswordValidationSchema),
+    AuthControllers.changePassword,
+  );
+  
+  router.post(
+    '/refresh-token',
+    validateRequest(AuthValidation.refreshTokenValidationSchema),
+    AuthControllers.refreshToken,
+  );
+  
+  router.post(
+    '/forget-password',
+    validateRequest(AuthValidation.forgetPasswordValidationSchema),
+    AuthControllers.forgetPassword,
+  );
+  
+  router.post(
+    '/reset-password',
+    validateRequest(AuthValidation.forgetPasswordValidationSchema),
+    AuthControllers.resetPassword,
+  );
+>>>>>>> 47887c9c5d66776b87d3bff15332eac8f84e7ab0
 
 export const AuthRouters = router;

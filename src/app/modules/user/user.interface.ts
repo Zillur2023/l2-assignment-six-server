@@ -9,6 +9,8 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  needsPasswordChange: boolean;
+  passwordChangedAt?: Date;
   bio?: string;
   image?: string;
   followers: Types.ObjectId[]; // Array of ObjectIds referencing 'User'
