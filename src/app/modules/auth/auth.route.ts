@@ -1,14 +1,11 @@
 import { Router } from "express";
 import { AuthControllers } from "./auth.controller";
-import auth from "../../middlewares/auth";
-import { USER_ROLE } from "../user/user.constant";
-import validateRequest from "../../middlewares/validateRequest";
-import { AuthValidation } from "./auth.validation";
 
 const router = Router();
 
 router.post("/login", AuthControllers.loginUser);
 
+<<<<<<< HEAD
 router.post(
     '/change-password',
     auth(
@@ -37,5 +34,14 @@ router.post(
     // validateRequest(AuthValidation.forgetPasswordValidationSchema),
     AuthControllers.resetPassword,
   );
+=======
+router.post("/change-password", AuthControllers.changePassword);
+
+router.post("/refresh-token", AuthControllers.refreshToken);
+
+router.post("/forget-password", AuthControllers.forgetPassword);
+
+router.post("/reset-password", AuthControllers.resetPassword);
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
 export const AuthRouters = router;

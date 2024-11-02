@@ -2,17 +2,20 @@ import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import { User } from "./user.model";
 import { IUser } from "./user.interface";
-import { stringify } from "querystring";
 import mongoose from "mongoose";
 import Post from "../post/post.model";
-import { emitWarning } from "process";
 import { initiatePayment } from "../payment/payment.utils";
+
 
 // const createUserIntoDB = async (payload: Pick<IUser, 'name' | 'email' | 'password'>) => {
 const createUserIntoDB = async (payload: IUser) => {
   
   // checking if the user is exist
+<<<<<<< HEAD
   const isUserExist = await User.findOne({email:payload.email});
+=======
+  const isUserExist = await User.findOne({email: payload.email});
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   if (isUserExist) {
     throw new AppError(
@@ -211,6 +214,7 @@ const updateVerifiedIntoDB = async (id:string) => {
 }
 
 
+
 export const UserServices = {
   createUserIntoDB,
   getAllUserFromDB,
@@ -220,7 +224,7 @@ export const UserServices = {
   updateUserFollowersIntoDB,
   updateFollowAndUnfollowIntoDB,
   isAvailableForVerifiedIntoDB,
-  updateVerifiedIntoDB
+  updateVerifiedIntoDB,
 };
 
 

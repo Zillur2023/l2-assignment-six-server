@@ -110,6 +110,7 @@ const updateVeirfied = catchAsync(async (req, res) => {
   });
 });
 
+
 export const UserControllers = {
   createUser,
   getAllUser,

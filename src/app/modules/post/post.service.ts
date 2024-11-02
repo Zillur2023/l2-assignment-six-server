@@ -35,14 +35,21 @@ const deleteUnassociatedPosts = async () => {
       await Post.deleteMany({ _id: { $in: postIdsToDelete } });
       console.log(`Deleted ${postIdsToDelete.length} posts without associated users.`);
     } else {
+<<<<<<< HEAD
       // console.log('No posts to delete.');
+=======
+      console.log('No posts to delete.');
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
     }
   } catch (error) {
     console.error('Error deleting unassociated posts:', error);
   }
 };
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
 const getAllPostFromDB = async (
   postId?: string, 
@@ -52,6 +59,12 @@ const getAllPostFromDB = async (
   sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
 ) => {
   await deleteUnassociatedPosts(); // Delete posts without associated users
+<<<<<<< HEAD
+=======
+
+
+  let result;
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   const pipeline: any[] = [];
 

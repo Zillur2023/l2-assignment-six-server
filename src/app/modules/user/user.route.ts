@@ -36,4 +36,6 @@ router.put("/update-follow-unfollow/:id", UserControllers.updateFollowAndUnfollo
 router.put("/update-verified/:id", UserControllers.updateVeirfied);
 
 
+
+
 export const UserRouters = router;

@@ -4,7 +4,7 @@ import { createToken, verifyToken } from "./auth.utils";
 // import config from "../../config";
 import { User } from "../user/user.model";
 import { ILoginUser } from "./auth.interface";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt,{ JwtPayload } from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import { sendEmail } from "../../utils/sendEmail";
 import config from "../../config";
@@ -78,7 +78,7 @@ const changePassword = async (
   payload: { oldPassword: string; newPassword: string },
 ) => {
   // checking if the user is exist
-  const user = await User.findOne({email: userData.email});
+  const user = await User.findOne({email: userData?.email});
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -112,8 +112,8 @@ const changePassword = async (
 
   await User.findOneAndUpdate(
     {
-      email: userData.email,
-      role: userData.role,
+      id: user?.email,
+      role: user?.role,
     },
     {
       password: newHashedPassword,
@@ -132,7 +132,7 @@ const refreshToken = async (token: string) => {
   const { email, iat } = decoded;
 
   // checking if the user is exist
-  const user = await User.findOne({email});
+  const user = await User.findOne(email);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -159,8 +159,8 @@ const refreshToken = async (token: string) => {
   }
 
   const jwtPayload = {
-    email: user.email,
-    role: user.role,
+    email: user?.email,
+    role: user?.role,
   };
 
   const accessToken = createToken(
@@ -174,9 +174,10 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const forgetPassword = async (email: string) => {
+const forgetPassword = async (payload: any) => {
   // checking if the user is exist
-  const user = await User.findOne({email});
+  // console.log({payload})
+  const user = await User.findOne({email: payload?.email});
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -196,8 +197,10 @@ const forgetPassword = async (email: string) => {
   }
 
   const jwtPayload = {
-    email: user.email,
-    role: user.role,
+    // userId: user.id,
+    // _id: isUserExist._id,
+    email: user?.email,
+    role: user?.role,
   };
 
   const resetToken = createToken(
@@ -206,6 +209,7 @@ const forgetPassword = async (email: string) => {
     '10m',
   );
 
+<<<<<<< HEAD
   // console.log({resetToken})
 
   // const resetUILink = `${config.reset_pass_ui_link}?email=${user?.email}&token=${resetToken} `;
@@ -221,6 +225,29 @@ const resetPassword = async (
   token: string,
 ) => {
   
+=======
+  console.log({resetToken})
+
+  // const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
+  const resetUILink = `http://localhost:3000/reset-password?email=${user?.email}&token=${resetToken} `;
+
+  const email = sendEmail(user.email, resetUILink);
+
+  if(!email) {
+    throw new AppError(httpStatus.NON_AUTHORITATIVE_INFORMATION, "Failed to send email ")
+  }
+
+  // console.log(resetUILink);
+
+  return resetUILink
+};
+
+const resetPassword = async (
+  payload: { email: string; newPassword: string; token: string, },
+  
+) => {
+  console.log("resetPassword payload  ", payload)
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
   // checking if the user is exist
   const user = await User.findOne({email: payload?.email});
 
@@ -242,13 +269,16 @@ const resetPassword = async (
   }
 
   const decoded = jwt.verify(
-    token,
+    payload?.token,
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
+<<<<<<< HEAD
   // console.log({decoded})
 
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
+=======
+>>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   if (payload?.email !== decoded?.email) {
     console.log(payload?.email, decoded?.email);
@@ -278,7 +308,6 @@ const resetPassword = async (
 
   // console.log({result})
 };
-
 export const AuthServices = {
   loginUser,
   changePassword,
