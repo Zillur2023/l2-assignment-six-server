@@ -27,17 +27,14 @@ const loginValidationSchema = z.object({
   
   const forgetPasswordValidationSchema = z.object({
     body: z.object({
-      id: z.string({
-        required_error: 'User id is required!',
-      }),
+      email: z.string({ required_error: 'Email is required.' }).email({ message: 'Please enter a valid email address.' }),
+
     }),
   });
   
   const resetPasswordValidationSchema = z.object({
     body: z.object({
-      id: z.string({
-        required_error: 'User id is required!',
-      }),
+      email: z.string({ required_error: 'Email is required.' }).email({ message: 'Please enter a valid email address.' }),
       newPassword: z.string({
         required_error: 'User password is required!',
       }),

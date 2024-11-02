@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { PostControllers } from "./post.controller";
 import { multerUpload } from "../../config/multer.config";
+import auth from "../../middlewares/auth";
+import { USER_ROLE } from "../user/user.constant";
 
 const router = Router()
 

@@ -3,21 +3,26 @@ import config from '../config';
 
 export const sendEmail = async (to: string, html: string) => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com.',
+    host: 'smtp.gmail.com',
     port: 587,
-    secure: config.NODE_ENV === 'production',
+    secure: config.NODE_ENV === 'production', // Use TLS in production
     auth: {
-      // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-      user: 'mezbaul@programming-hero.com',
-      pass: 'xfqj dshz wdui ymtb',
+      user: 'zillurrahmanbd12@gmail.com',
+      // pass: 'xrpw jnwq rgba cqlj',
+      pass: 'obpi lcmr fysv hof',
     },
   });
 
-  await transporter.sendMail({
-    from: 'mezbaul@programming-hero.com', // sender address
-    to, // list of receivers
-    subject: 'Reset your password within ten mins!', // Subject line
-    text: '', // plain text body
-    html, // html body
-  });
+  try {
+    await transporter.sendMail({
+      from: "zillurrahmanbd12@gmail.com", // sender address
+      to, // list of receivers
+      subject: 'Reset your password within ten minutes!', // Subject line
+      text: '', // plain text body
+      html, // HTML body
+    });
+    console.log(`Email sent to ${to}`);
+  } catch (error) {
+    console.error(`Error sending email: ${error}`);
+  }
 };

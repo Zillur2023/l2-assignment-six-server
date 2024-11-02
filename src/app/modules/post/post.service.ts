@@ -16,6 +16,33 @@ const createPostIntoDB = async (payload: IPost) => {
   return result;
 };
 
+const deleteUnassociatedPosts = async () => {
+  try {
+    // Step 1: Get all user IDs and all post IDs
+    const allUserIds = await User.find().select('_id').lean(); // Get all user IDs
+    const allPostIds = await Post.find().select('_id author').lean(); // Get all post IDs with their authors
+
+    // Extract user IDs from the array of user objects
+    const userIds = allUserIds.map(user => user._id.toString()); // Convert ObjectId to string for comparison
+
+    // Step 2: Filter posts that do not have an associated user ID
+    const postIdsToDelete = allPostIds
+      .filter(post => !userIds.includes(post.author.toString())) // Keep posts without a valid user
+      .map(post => post._id); // Get the IDs of those posts
+
+    // Step 3: Delete the unassociated posts
+    if (postIdsToDelete.length > 0) {
+      await Post.deleteMany({ _id: { $in: postIdsToDelete } });
+      console.log(`Deleted ${postIdsToDelete.length} posts without associated users.`);
+    } else {
+      // console.log('No posts to delete.');
+    }
+  } catch (error) {
+    console.error('Error deleting unassociated posts:', error);
+  }
+};
+
+
 
 const getAllPostFromDB = async (
   postId?: string, 
@@ -24,15 +51,13 @@ const getAllPostFromDB = async (
   category?: string,
   sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
 ) => {
-  let result;
+  await deleteUnassociatedPosts(); // Delete posts without associated users
 
-  // Initialize the aggregation pipeline
   const pipeline: any[] = [];
 
   // If postId is provided, fetch the specific post
   if (postId) {
     pipeline.push({ $match: { _id: new mongoose.Types.ObjectId(postId) } });
-    // await Post.find({_id: postId})
   } else if (userId) {
     // If userId is provided, fetch posts by that user
     pipeline.push({ $match: { author: new mongoose.Types.ObjectId(userId) } });
@@ -43,28 +68,19 @@ const getAllPostFromDB = async (
         $match: { title: { $regex: searchTerm, $options: "i" } }, // 'i' for case-insensitive
       });
     }
-       // If category is provided, filter by category
-       if (category) {
-        pipeline.push({
-          $match: { category: category },
-        });
-      }
+    // If category is provided, filter by category
+    if (category) {
+      pipeline.push({
+        $match: { category: category },
+      });
+    }
   }
 
-  // Add fields to calculate the count of upvotes and downvotes
-  pipeline.push({
-    $addFields: {
-      upvoteCount: { $size: "$upvotes" }, // Calculate upvote count
-      downvoteCount: { $size: "$downvotes" }, // Calculate downvote count
-      commentCount: { $size: "$comments" }
-    },
-  });
-
-  // Perform lookups for populating author, upvotes, downvotes, and comments
+  // Lookup stages for author and comments
   pipeline.push(
     {
       $lookup: {
-        from: "users", // Collection name for authors
+        from: "users",
         localField: "author",
         foreignField: "_id",
         as: "author",
@@ -72,9 +88,9 @@ const getAllPostFromDB = async (
     },
     {
       $unwind: {
-        path: "$author", // Unwind author array to get author object
-        preserveNullAndEmptyArrays: true // Allow posts without an author to be returned
-      }
+        path: "$author",
+        preserveNullAndEmptyArrays: true,
+      },
     },
     {
       $lookup: {
@@ -94,7 +110,7 @@ const getAllPostFromDB = async (
     },
     {
       $lookup: {
-        from: "comments", // Collection name for comments
+        from: "comments",
         localField: "comments",
         foreignField: "_id",
         as: "comments",
@@ -102,40 +118,43 @@ const getAllPostFromDB = async (
     }
   );
 
-  // Sorting options based on the sortBy parameter
+  // Execute the aggregation pipeline to get all posts
+  const result = await Post.aggregate(pipeline).exec();
+
+  // Sorting based on upvotes and downvotes after fetching
   if (sortBy) {
-    let sortOption: any = {};
+    result.sort((a, b) => {
+      const upvoteCountA = a.upvotes ? a.upvotes.length : 0;
+      const upvoteCountB = b.upvotes ? b.upvotes.length : 0;
+      const downvoteCountA = a.downvotes ? a.downvotes.length : 0;
+      const downvoteCountB = b.downvotes ? b.downvotes.length : 0;
 
-    switch (sortBy) {
-      case "highestUpvotes":
-        sortOption = { upvoteCount: -1 }; // Sort by most upvotes (descending)
-        break;
-      case "lowestUpvotes":
-        sortOption = { upvoteCount: 1 }; // Sort by least upvotes (ascending)
-        break;
-      case "highestDownvotes":
-        sortOption = { downvoteCount: -1 }; // Sort by most downvotes (descending)
-        break;
-      case "lowestDownvotes":
-        sortOption = { downvoteCount: 1 }; // Sort by least downvotes (ascending)
-        break;
-      default:
-        sortOption = { upvoteCount: -1 }; // Default sorting
-        break;
-    }
-
-    // Add sort stage to the pipeline
-    pipeline.push({ $sort: sortOption });
+      switch (sortBy) {
+        case "highestUpvotes":
+          return upvoteCountB - upvoteCountA; // Sort descending
+        case "lowestUpvotes":
+          return upvoteCountA - upvoteCountB; // Sort ascending
+        case "highestDownvotes":
+          return downvoteCountB - downvoteCountA; // Sort descending
+        case "lowestDownvotes":
+          return downvoteCountA - downvoteCountB; // Sort ascending
+        default:
+         return 0; 
+      }
+    });
   } else {
-    // Default sorting by most upvotes if no sortBy is specified
-    pipeline.push({ $sort: { upvoteCount: -1 } });
+    // Default sort by highest upvotes if no sort option is provided
+    result.sort((a, b) => {
+      const upvoteCountA = a.upvotes ? a.upvotes.length : 0;
+      const upvoteCountB = b.upvotes ? b.upvotes.length : 0;
+      return upvoteCountB - upvoteCountA; // Sort by upvotes descending
+    });
   }
-
-  // Execute the aggregation pipeline
-  result = await Post.aggregate(pipeline).exec();
 
   return result;
 };
+
+
 
 
 
@@ -174,23 +193,27 @@ export const updateUpvotesIntoDB = async (userId: string, postId: string) => {
   const hasDownvoted = post.downvotes.some((downvoteId) => downvoteId.equals(userObjectId));
 
   if (hasDownvoted) {
-    throw new AppError(httpStatus.FORBIDDEN, "You cannot upvote after downvoting. Remove downvote first.");
-  }
-
-  if (hasUpvoted) {
-    // If already upvoted, remove the upvote
-    await Post.findByIdAndUpdate(
-      postObjectId,
-      { $pull: { upvotes: userObjectId } },
-      { new: true }
-    );
+   await Post.findByIdAndUpdate(
+    postObjectId,
+    {$pull: {downvotes: userObjectId}},
+    {new: true}
+   )
   } else {
-    // Add the upvote
-    await Post.findByIdAndUpdate(
-      postObjectId,
-      { $addToSet: { upvotes: userObjectId } },
-      { new: true }
-    );
+    if (hasUpvoted) {
+      // If already upvoted, remove the upvote
+      await Post.findByIdAndUpdate(
+        postObjectId,
+        { $pull: { upvotes: userObjectId } },
+        { new: true }
+      );
+    } else {
+      // Add the upvote
+      await Post.findByIdAndUpdate(
+        postObjectId,
+        { $addToSet: { upvotes: userObjectId } },
+        { new: true }
+      );
+    }
   }
 
   return Post.findById(postObjectId); // Return the updated post
@@ -228,23 +251,28 @@ export const updateDownvotesIntoDB = async (userId: string, postId: string) => {
   const hasUpvoted = post.upvotes.some((upvoteId) => upvoteId.equals(userObjectId));
 
   if (hasUpvoted) {
-    throw new AppError(httpStatus.FORBIDDEN, "You cannot downvote after upvoting. Remove upvote first.");
-  }
-
-  if (hasDownvoted) {
-    // If already downvoted, remove the downvote
+    // throw new AppError(httpStatus.FORBIDDEN, "You cannot downvote after upvoting. Remove upvote first.");
     await Post.findByIdAndUpdate(
       postObjectId,
-      { $pull: { downvotes: userObjectId } },
-      { new: true }
-    );
+      {$pull: {upvotes: userObjectId}},
+      {new: true}
+     )
   } else {
-    // Add the downvote
-    await Post.findByIdAndUpdate(
-      postObjectId,
-      { $addToSet: { downvotes: userObjectId } },
-      { new: true }
-    );
+    if (hasDownvoted) {
+      // If already downvoted, remove the downvote
+      await Post.findByIdAndUpdate(
+        postObjectId,
+        { $pull: { downvotes: userObjectId } },
+        { new: true }
+      );
+    } else {
+      // Add the downvote
+      await Post.findByIdAndUpdate(
+        postObjectId,
+        { $addToSet: { downvotes: userObjectId } },
+        { new: true }
+      );
+    }
   }
 
   return Post.findById(postObjectId); // Return the updated post

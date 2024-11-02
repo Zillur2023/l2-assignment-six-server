@@ -10,13 +10,8 @@ import AppError from "../../errors/AppError";
 const loginUser = catchAsync(async (req, res) => {
     const result = await AuthServices.loginUser(req.body);
     const { user,refreshToken, accessToken } = result;
+    console.log({accessToken})
   
-    // res.cookie('accessToken', accessToken, {
-    //   secure: config.NODE_ENV === 'production',
-    //   httpOnly: true,
-    //   sameSite: true,
-    //   maxAge: 1000 * 60 * 60 * 24 * 365,
-    // });
     res.cookie('refreshToken', refreshToken, {
       secure: config.NODE_ENV === 'production',
       httpOnly: true,
@@ -29,7 +24,6 @@ const loginUser = catchAsync(async (req, res) => {
       success: true,
       message: `${user?.email} is logged in succesfully!`,
       data: {
-        user,
         token:accessToken,
       },
     });
@@ -61,6 +55,7 @@ const loginUser = catchAsync(async (req, res) => {
   
   const forgetPassword = catchAsync(async (req, res) => {
     const {email} = req.body;
+    // const {email} = req.params;
     const result = await AuthServices.forgetPassword(email);
     sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -72,6 +67,7 @@ const loginUser = catchAsync(async (req, res) => {
   
   const resetPassword = catchAsync(async (req, res) => {
     const token = req.headers.authorization;
+    console.log('resetToken --> after',token)
   
     if (!token) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Something went wrong !');
