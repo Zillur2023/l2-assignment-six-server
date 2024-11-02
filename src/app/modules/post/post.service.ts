@@ -410,31 +410,31 @@ export const PostServices = {
   isAvailableForVerifiedIntoDB
 };
 
-const getAllPostFromDB = async (postId?: string, userId?: string) => {
-  let result;
+// const getAllPostFromDB = async (postId?: string, userId?: string) => {
+//   let result;
 
-  if (postId) {
-    // If postId is provided, fetch the specific post
-    result = await Post.find({ _id: postId })
-      .populate("author")
-      .populate("upvotes")
-      .populate("downvotes")
-      .populate("comments");
-  } else if (userId) {
-    // If userId is provided, fetch posts by that user
-    result = await Post.find({ author: userId })
-      .populate("author")
-      .populate("upvotes")
-      .populate("downvotes")
-      .populate("comments");
-  } else {
-    // If neither postId nor userId is provided, fetch all posts
-    result = await Post.find()
-      .populate("author")
-      .populate("upvotes")
-      .populate("downvotes")
-      .populate("comments");
-  }
+//   if (postId) {
+//     // If postId is provided, fetch the specific post
+//     result = await Post.find({ _id: postId })
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   } else if (userId) {
+//     // If userId is provided, fetch posts by that user
+//     result = await Post.find({ author: userId })
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   } else {
+//     // If neither postId nor userId is provided, fetch all posts
+//     result = await Post.find()
+//       .populate("author")
+//       .populate("upvotes")
+//       .populate("downvotes")
+//       .populate("comments");
+//   }
 
-  return result;
-};
+//   return result;
+// };
