@@ -209,23 +209,7 @@ const forgetPassword = async (payload: any) => {
     '10m',
   );
 
-<<<<<<< HEAD
-  // console.log({resetToken})
 
-  // const resetUILink = `${config.reset_pass_ui_link}?email=${user?.email}&token=${resetToken} `;
-  const resetUILink = `${config.reset_pass_ui_link}?email=${user?.email}&token=${resetToken} `;
-
-  await sendEmail(user?.email, resetUILink);
-
- 
-};
-
-const resetPassword = async (
-  payload: { email: string; newPassword: string },
-  token: string,
-) => {
-  
-=======
   console.log({resetToken})
 
   // const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
@@ -247,7 +231,7 @@ const resetPassword = async (
   
 ) => {
   console.log("resetPassword payload  ", payload)
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
+
   // checking if the user is exist
   const user = await User.findOne({email: payload?.email});
 
@@ -273,12 +257,9 @@ const resetPassword = async (
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
-<<<<<<< HEAD
   // console.log({decoded})
 
   //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
-=======
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   if (payload?.email !== decoded?.email) {
     console.log(payload?.email, decoded?.email);

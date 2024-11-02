@@ -11,11 +11,7 @@ import { initiatePayment } from "../payment/payment.utils";
 const createUserIntoDB = async (payload: IUser) => {
   
   // checking if the user is exist
-<<<<<<< HEAD
   const isUserExist = await User.findOne({email:payload.email});
-=======
-  const isUserExist = await User.findOne({email: payload.email});
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   if (isUserExist) {
     throw new AppError(

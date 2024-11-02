@@ -36,11 +36,6 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.7.5",
     "@types/nodemailer": "^6.4.16",
-<<<<<<< HEAD
-    "i": "^0.3.7",
-    "npm": "^10.9.0",
-=======
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.2"
   }

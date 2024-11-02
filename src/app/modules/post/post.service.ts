@@ -35,21 +35,14 @@ const deleteUnassociatedPosts = async () => {
       await Post.deleteMany({ _id: { $in: postIdsToDelete } });
       console.log(`Deleted ${postIdsToDelete.length} posts without associated users.`);
     } else {
-<<<<<<< HEAD
       // console.log('No posts to delete.');
-=======
-      console.log('No posts to delete.');
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
+
     }
   } catch (error) {
     console.error('Error deleting unassociated posts:', error);
   }
 };
-<<<<<<< HEAD
 
-
-=======
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
 const getAllPostFromDB = async (
   postId?: string, 
@@ -59,12 +52,10 @@ const getAllPostFromDB = async (
   sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
 ) => {
   await deleteUnassociatedPosts(); // Delete posts without associated users
-<<<<<<< HEAD
-=======
+
 
 
   let result;
->>>>>>> ebe166f0837f43dd75e6bb5659e0f784006b11bf
 
   const pipeline: any[] = [];
 
@@ -132,7 +123,7 @@ const getAllPostFromDB = async (
   );
 
   // Execute the aggregation pipeline to get all posts
-  const result = await Post.aggregate(pipeline).exec();
+   result = await Post.aggregate(pipeline).exec();
 
   // Sorting based on upvotes and downvotes after fetching
   if (sortBy) {
@@ -419,31 +410,31 @@ export const PostServices = {
   isAvailableForVerifiedIntoDB
 };
 
-// const getAllPostFromDB = async (postId?: string, userId?: string) => {
-//   let result;
+const getAllPostFromDB = async (postId?: string, userId?: string) => {
+  let result;
 
-//   if (postId) {
-//     // If postId is provided, fetch the specific post
-//     result = await Post.find({ _id: postId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else if (userId) {
-//     // If userId is provided, fetch posts by that user
-//     result = await Post.find({ author: userId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else {
-//     // If neither postId nor userId is provided, fetch all posts
-//     result = await Post.find()
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   }
+  if (postId) {
+    // If postId is provided, fetch the specific post
+    result = await Post.find({ _id: postId })
+      .populate("author")
+      .populate("upvotes")
+      .populate("downvotes")
+      .populate("comments");
+  } else if (userId) {
+    // If userId is provided, fetch posts by that user
+    result = await Post.find({ author: userId })
+      .populate("author")
+      .populate("upvotes")
+      .populate("downvotes")
+      .populate("comments");
+  } else {
+    // If neither postId nor userId is provided, fetch all posts
+    result = await Post.find()
+      .populate("author")
+      .populate("upvotes")
+      .populate("downvotes")
+      .populate("comments");
+  }
 
-//   return result;
-// };
+  return result;
+};
