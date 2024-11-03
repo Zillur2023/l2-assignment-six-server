@@ -24,14 +24,15 @@ const createPost = catchAsync(async (req, res) => {
       userId?: string;
     };
   
-    const { searchTerm, category, sortBy } = req.query as {
+    const { searchTerm, category, sortBy, isPremium } = req.query as {
       searchTerm?: string;
       category?: string;
       sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
+      isPremium?: boolean 
     };
   
     // Fetch posts from the database using the params and query parameters
-    const result = await PostServices.getAllPostFromDB(postId, userId, searchTerm, category, sortBy);
+    const result = await PostServices.getAllPostFromDB(postId, userId, searchTerm, category, sortBy, isPremium);
   
     // Send response back to the client
     sendResponse(res, {

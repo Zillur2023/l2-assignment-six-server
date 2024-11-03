@@ -49,18 +49,21 @@ const getAllPostFromDB = async (
   userId?: string, 
   searchTerm?: string, 
   category?: string,
-  sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes"
+  sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes",
+  isPremium?: boolean  // New parameter to specify premium filter
 ) => {
   await deleteUnassociatedPosts(); // Delete posts without associated users
-
-
 
   let result;
 
   const pipeline: any[] = [];
 
-  // If postId is provided, fetch the specific post
+  if (!isPremium) {
+    pipeline.push({ $match: { isPremium: { $ne: true } } });
+  }
+
   if (postId) {
+  // If postId is provided, fetch the specific post
     pipeline.push({ $match: { _id: new mongoose.Types.ObjectId(postId) } });
   } else if (userId) {
     // If userId is provided, fetch posts by that user
@@ -69,7 +72,13 @@ const getAllPostFromDB = async (
     // If searchTerm is provided, search by title (case-insensitive)
     if (searchTerm) {
       pipeline.push({
-        $match: { title: { $regex: searchTerm, $options: "i" } }, // 'i' for case-insensitive
+        $match: {
+          $or: [
+            { title: { $regex: searchTerm, $options: "i" } },
+            { category: { $regex: searchTerm, $options: "i" } },
+            { content: { $regex: searchTerm, $options: "i" } }
+          ]
+        }
       });
     }
     // If category is provided, filter by category
@@ -157,13 +166,6 @@ const getAllPostFromDB = async (
 
   return result;
 };
-
-
-
-
-
-
-
 
 
 export const updateUpvotesIntoDB = async (userId: string, postId: string) => {
@@ -335,49 +337,7 @@ const deletePostFromDB = async (postId: string) => {
   return result;
 };
 
-// const isAvailableForVerifiedIntoDB = async (id: string) => {
-//   const user = await User.findById(id);
 
-//   if (!user) {
-//     throw new AppError(httpStatus.NOT_FOUND, "User not found");
-//   }
-
-//   // Query 1: Find posts with upvotes that include the user
-//   const postsWithUserUpvoted = await Post.find({
-//     author: id,
-//     // $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-//     // upvotes: { $elemMatch: { $eq: user._id } } 
-//   }).select("upvotes");
-
-//     // Flatten the upvotes from all posts into a single array
-//     const allUpvotes = postsWithUserUpvoted.flatMap((post) => post.upvotes);
-
-
-//   // If there are more than 1 post where the user has been upvoted, return true
-//   // if (postsWithUserUpvoted.length > 1) {
-//   //   return true;
-//   // } else {
-//   //   if (postsWithUserUpvoted.length > 0) {
-//   //     return true
-//   //   }
-//   // }
-
-//   // // Query 2: Find posts with upvotes but the user is not in the upvotes array
-//   // const postsWithoutUserUpvoted = await Post.find({
-//   //   author: id,
-//   //   $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-//   //   upvotes: { $not: { $elemMatch: { $eq: user._id } } } // User is not in the upvotes array
-//   // });
-
-//   // // If there are any such posts, return true
-//   // if (postsWithoutUserUpvoted.length > 0) {
-//   //   return true;
-//   // }
-
-//   // Otherwise, return false
-//   // return false;
-//   return postsWithUserUpvoted; 
-// };
 
 const isAvailableForVerifiedIntoDB = async (id: string) => {
     const user = await User.findById(id);
@@ -410,31 +370,3 @@ export const PostServices = {
   isAvailableForVerifiedIntoDB
 };
 
-// const getAllPostFromDB = async (postId?: string, userId?: string) => {
-//   let result;
-
-//   if (postId) {
-//     // If postId is provided, fetch the specific post
-//     result = await Post.find({ _id: postId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else if (userId) {
-//     // If userId is provided, fetch posts by that user
-//     result = await Post.find({ author: userId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else {
-//     // If neither postId nor userId is provided, fetch all posts
-//     result = await Post.find()
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   }
-
-//   return result;
-// };
