@@ -87,17 +87,7 @@ const updateFollowAndUnfollow = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const isAvailableForVerified = catchAsync(async (req, res) => {
-  const {id} = req.params
-  const result = await UserServices.isAvailableForVerifiedIntoDB(id);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Available for verified successfully',
-    data: result,
-  });
-});
 const updateVeirfied = catchAsync(async (req, res) => {
   const {id} = req.params
   const result = await UserServices.updateVerifiedIntoDB(id);
@@ -106,6 +96,17 @@ const updateVeirfied = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Verified update successfully',
+    data: result,
+  });
+});
+const deleteUser = catchAsync(async (req, res) => {
+  const {id} = req.params
+  const result = await UserServices.deleteUserFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User deleted successfully',
     data: result,
   });
 });
@@ -119,6 +120,6 @@ export const UserControllers = {
    updateUserProfile,
    updateFollowers,
    updateFollowAndUnfollow,
-   isAvailableForVerified,
    updateVeirfied,
+   deleteUser
 }

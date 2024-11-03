@@ -25,31 +25,52 @@ const createUserIntoDB = async (payload: IUser) => {
 };
 
 const getAllUserFromDB = async () => {
-  const result = await User.aggregate([
-    {
-      $addFields: {
-        followers: { $size: "$followers" },  // Replace the followers array with the count of followers
-        following: { $size: "$following" },  // Replace the following array with the count of following
-      },
-    },
-    {
-      $project: {
-        _id: 1,           // Include _id
-        name: 1,          // Include name
-        email: 1,         // Include email
-        image: 1,         // Include image
-        followers: 1,     // Include followers (now the count)
-        following: 1,     // Include following (now the count)
-        isVerified: 1,    // Include verification status
-        role: 1,          // Include role
-        paymentStatus: 1, // Include payment status
-        transactionId: 1, // Include transaction ID
-      },
-    },
-  ]);
+  // const result = await User.aggregate([
+  //   {
+  //     $addFields: {
+  //       followers: { $size: "$followers" },  // Replace the followers array with the count of followers
+  //       following: { $size: "$following" },  // Replace the following array with the count of following
+  //     },
+  //   },
+  //   {
+  //     $project: {
+  //       _id: 1,           // Include _id
+  //       name: 1,          // Include name
+  //       email: 1,         // Include email
+  //       image: 1,         // Include image
+  //       followers: 1,     // Include followers (now the count)
+  //       following: 1,     // Include following (now the count)
+  //       isVerified: 1,    // Include verification status
+  //       role: 1,          // Include role
+  //       paymentStatus: 1, // Include payment status
+  //       transactionId: 1, // Include transaction ID
+  //     },
+  //   },
+  // ]);
 
-  return result;
-};
+  
+const result = await User.aggregate([
+  { $match: { isDeleted: { $ne: true } } },
+  {
+    $lookup: {
+      from: "users",
+      localField: "followers",
+      foreignField: "_id",
+      as: "followes",
+    },
+  },
+  {
+    $lookup: {
+      from: "users", // Collection name for upvotes
+      localField: "following",
+      foreignField: "_id",
+      as: "following",
+    },
+  },
+]).exec();
+  
+return result
+}
 const getUserFromDB = async (email: string) => {
   const result = await User.findOne({ email });
 
@@ -143,41 +164,7 @@ const updateUserFollowersIntoDB = async (id: string,payload: Record<string, unkn
       }
     };
     
-    const isAvailableForVerifiedIntoDB = async (id: string): Promise<boolean> => {
-      const user = await User.findById(id);
-    
-      // Return false if the user doesn't exist
-      if (!user) {
-        return false;
-      }
-    
-      // Query 1: Find posts with upvotes that include the user
-      const postsWithUserUpvoted = await Post.find({
-        author: id,
-        $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-        upvotes: { $elemMatch: { $eq: user._id } } // User is in the upvotes array
-      });
-    
-      // If there are more than 1 post where the user has been upvoted, return true
-      if (postsWithUserUpvoted.length > 1) {
-        return true;
-      }
-    
-      // Query 2: Find posts with upvotes but the user is not in the upvotes array
-      const postsWithoutUserUpvoted = await Post.find({
-        author: id,
-        $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-        upvotes: { $not: { $elemMatch: { $eq: user._id } } } // User is not in the upvotes array
-      });
-    
-      // If there are any such posts, return true
-      if (postsWithoutUserUpvoted.length > 0) {
-        return true;
-      }
-    
-      // Otherwise, return false
-      return false;
-    };
+ 
 
 const updateVerifiedIntoDB = async (id:string) => {
     const user = await User.findById(id)
@@ -209,6 +196,10 @@ const updateVerifiedIntoDB = async (id:string) => {
     return {paymentSession}
 }
 
+const deleteUserFromDB = async(id: string) => {
+  const result = await User.findByIdAndUpdate(id, {isDeleted: true}, {new: true})
+}
+
 
 
 export const UserServices = {
@@ -219,36 +210,10 @@ export const UserServices = {
   updateUserProfileIntoDB,
   updateUserFollowersIntoDB,
   updateFollowAndUnfollowIntoDB,
-  isAvailableForVerifiedIntoDB,
   updateVerifiedIntoDB,
+  deleteUserFromDB
 };
 
 
 
-// const updateFollowAndUnfollowIndoDB = async (id: string,payload: IUser) => {
-//   const userId = new mongoose.Types.ObjectId(payload._id);
-//   const followingId = new mongoose.Types.ObjectId(id);
-  
-//   const user = await User.findById(userId);
-//   const followingUser = await User.findById(followingId);
 
-//      if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found")
-//      if (!followingUser) throw new AppError(httpStatus.NOT_FOUND, "Following User not found")
-
-//       if (!user.following.some((id) => id.equals(followingId))) {
-//         user.following.push(followingId);  
-//         followingUser.followers.push(userId)
-//           await user.save();
-//         await followingUser.save();
-//       } else {
-//         user.following = user.following.filter(
-//           (followeringId) => !followeringId.equals(followingId)
-//         );  
-//         followingUser.followers = followingUser.followers.filter(
-//           (followerId) => !followerId.equals(userId)
-//         );  
-//         await user.save();
-//         await followingUser.save();
-//       }
-
-// }

@@ -19,7 +19,7 @@ const createPostIntoDB = async (payload: IPost) => {
 const deleteUnassociatedPosts = async () => {
   try {
     // Step 1: Get all user IDs and all post IDs
-    const allUserIds = await User.find().select('_id').lean(); // Get all user IDs
+    const allUserIds = await User.find({isDeleted:false}).select('_id').lean(); // Get all user IDs
     const allPostIds = await Post.find().select('_id author').lean(); // Get all post IDs with their authors
 
     // Extract user IDs from the array of user objects

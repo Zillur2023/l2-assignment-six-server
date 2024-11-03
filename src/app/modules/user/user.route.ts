@@ -35,6 +35,8 @@ router.put("/update-follow-unfollow/:id", UserControllers.updateFollowAndUnfollo
 
 router.put("/update-verified/:id", UserControllers.updateVeirfied);
 
+router.put("/delete/:id", UserControllers.deleteUser);
+
 
 
 
