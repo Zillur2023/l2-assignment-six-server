@@ -74,11 +74,10 @@ const loginUser = async (payload: ILoginUser) => {
 };
 
 const changePassword = async (
-  userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string },
+  payload: { email: string; oldPassword: string; newPassword: string, },
 ) => {
   // checking if the user is exist
-  const user = await User.findOne({email: userData?.email});
+  const user = await User.findOne({email: payload?.email});
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -132,7 +131,7 @@ const refreshToken = async (token: string) => {
   const { email, iat } = decoded;
 
   // checking if the user is exist
-  const user = await User.findOne(email);
+  const user = await User.findOne({email});
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');

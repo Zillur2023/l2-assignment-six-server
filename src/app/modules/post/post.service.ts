@@ -58,9 +58,13 @@ const getAllPostFromDB = async (
 
   const pipeline: any[] = [];
 
-  if (!isPremium) {
-    pipeline.push({ $match: { isPremium: { $ne: true } } });
-  }
+  // if (!isPremium) {
+  //   pipeline.push({ $match: { isPremium: { $ne: true } } });
+  // }
+  // if (!postId && !isPremium) {
+  //   pipeline.push({ $match: { isPremium: { $ne: true } } });
+  // }
+
 
   if (postId) {
   // If postId is provided, fetch the specific post

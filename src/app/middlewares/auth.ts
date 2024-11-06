@@ -12,6 +12,8 @@ const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization;
 
+    console.log("auth --- token", token)
+
     // checking if the token is missing
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
@@ -35,6 +37,8 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     const { role, email, iat } = decoded;
+
+    console.log("auth --- token", role, email , iat)
 
     // checking if the user is exist
     const user = await User.findOne({email});

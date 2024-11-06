@@ -32,7 +32,7 @@ const createCommentIntoDB = async (payload: IComment) => {
 };
 
 const getAllCommentFromDB = async (postId:string) => {
-  const result = await Comment.find({postId}).populate("userId") 
+  const result = await Comment.find({postId}).populate("userId").sort({ createdAt: -1 }); 
   
   return result
 }

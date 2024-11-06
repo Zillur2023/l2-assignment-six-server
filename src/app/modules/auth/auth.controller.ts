@@ -12,6 +12,12 @@ const loginUser = catchAsync(async (req, res) => {
     const { user,refreshToken, accessToken } = result;
     console.log({accessToken})
   
+    res.cookie('accessToken', accessToken, {
+      secure: config.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365,
+    });
     res.cookie('refreshToken', refreshToken, {
       secure: config.NODE_ENV === 'production',
       httpOnly: true,
@@ -30,9 +36,9 @@ const loginUser = catchAsync(async (req, res) => {
   });
 
   const changePassword = catchAsync(async (req, res) => {
-    const { ...passwordData } = req.body;
+    // const { ...passwordData } = req.body;
   
-    const result = await AuthServices.changePassword(req.user, passwordData);
+    const result = await AuthServices.changePassword(req.body);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -43,7 +49,17 @@ const loginUser = catchAsync(async (req, res) => {
   
   const refreshToken = catchAsync(async (req, res) => {
     const { refreshToken } = req.cookies;
+    
     const result = await AuthServices.refreshToken(refreshToken);
+    const { accessToken } = result; // Assuming refreshToken method returns an object with the access token
+
+    // Set the updated access token in the cookies
+    res.cookie('accessToken', accessToken, {
+        secure: config.NODE_ENV === 'production', // Use secure cookies in production
+        httpOnly: true, // Prevent access from JavaScript (for security)
+        sameSite: true, // Set appropriate SameSite attribute (usually 'strict' or 'lax')
+        maxAge: 1000 * 60 * 60 * 24 * 365, // Set cookie expiration
+    });
   
     sendResponse(res, {
       statusCode: httpStatus.OK,
