@@ -8,7 +8,7 @@ const router = Router()
 
 router.post('/create', multerUpload.single("image"), PostControllers.createPost)
 
-router.get('/all-post/:postId?/:userId?', auth(USER_ROLE.admin), PostControllers.getAllPost);
+router.get('/all-post/:postId?/:userId?', PostControllers.getAllPost);
 
 router.put("/upvotes", PostControllers.updateUpvotes);
 

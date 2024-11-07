@@ -33,6 +33,27 @@ const createCommentIntoDB = async (payload: IComment) => {
 
 const getAllCommentFromDB = async (postId:string) => {
   const result = await Comment.find({postId}).populate("userId").sort({ createdAt: -1 }); 
+  // const result = await Comment.find().populate("userId").sort({ createdAt: -1 }); 
+  // const result = await Comment.aggregate([
+  //   { $match: { postId } },
+  //   {
+  //     $lookup: {
+  //       from: "posts",
+  //       localField: "postId",
+  //       foreignField: "_id",
+  //       as: "postId",
+  //     },
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: "users", // Collection name for upvotes
+  //       localField: "userId",
+  //       foreignField: "_id",
+  //       as: "userId",
+  //     },
+  //   },
+  // ]).exec();
+    
   
   return result
 }

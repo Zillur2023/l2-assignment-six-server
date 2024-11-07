@@ -61,9 +61,9 @@ const getAllPostFromDB = async (
   // if (!isPremium) {
   //   pipeline.push({ $match: { isPremium: { $ne: true } } });
   // }
-  // if (!postId && !isPremium) {
-  //   pipeline.push({ $match: { isPremium: { $ne: true } } });
-  // }
+  if (!postId && !isPremium) {
+    pipeline.push({ $match: { isPremium: { $ne: true } } });
+  }
 
 
   if (postId) {
