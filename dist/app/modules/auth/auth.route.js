@@ -5,4 +5,8 @@ const express_1 = require("express");
 const auth_controller_1 = require("./auth.controller");
 const router = (0, express_1.Router)();
 router.post("/login", auth_controller_1.AuthControllers.loginUser);
+router.post("/change-password", auth_controller_1.AuthControllers.changePassword);
+router.post("/refresh-token", auth_controller_1.AuthControllers.refreshToken);
+router.post("/forget-password", auth_controller_1.AuthControllers.forgetPassword);
+router.post("/reset-password", auth_controller_1.AuthControllers.resetPassword);
 exports.AuthRouters = router;

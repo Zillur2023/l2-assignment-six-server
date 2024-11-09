@@ -11,10 +11,11 @@ const routes_1 = __importDefault(require("./app/routes"));
 // import globalErrorHandler from "./app/middlewares/globalErrorhandler";
 const globalErrorhandler_1 = __importDefault(require("./app/middlewares/globalErrorhandler"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
+const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
+app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
-// app.use(cors({ origin: [config.server_url as string] }));
 app.use((0, cors_1.default)({ origin: [config_1.default.client_url], credentials: true }));
 app.use("/api/v1", routes_1.default);
 // @ts-ignore

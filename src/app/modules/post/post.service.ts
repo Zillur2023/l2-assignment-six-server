@@ -27,15 +27,13 @@ const deleteUnassociatedPosts = async () => {
 
     // Step 2: Filter posts that do not have an associated user ID
     const postIdsToDelete = allPostIds
-      .filter(post => !userIds.includes(post.author.toString())) // Keep posts without a valid user
+      .filter(post => !userIds.includes(String(post?.author))) // Keep posts without a valid user
       .map(post => post._id); // Get the IDs of those posts
 
     // Step 3: Delete the unassociated posts
     if (postIdsToDelete.length > 0) {
       await Post.deleteMany({ _id: { $in: postIdsToDelete } });
-      console.log(`Deleted ${postIdsToDelete.length} posts without associated users.`);
     } else {
-      // console.log('No posts to delete.');
 
     }
   } catch (error) {

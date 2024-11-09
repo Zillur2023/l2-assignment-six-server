@@ -50,7 +50,8 @@ const createPaymentIntoDB = (id, transactionId, status) => __awaiter(void 0, voi
             statusClass = "message-failure"; // Failure class
         }
         // Load the HTML template
-        const filePath = (0, path_1.join)(__dirname, '../../../views/confirmation.html');
+        //   const filePath = join(__dirname, '../../../views/confirmation.html');
+        const filePath = (0, path_1.join)(__dirname, '../../../../public/confirmation.html');
         let template = readTemplate(filePath);
         // Replace placeholders in the HTML template
         template = template.replace('{{message}}', message);

@@ -29,9 +29,9 @@ const createPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 }));
 const getAllPost = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { postId, userId } = req.params;
-    const { searchTerm, category, sortBy } = req.query;
+    const { searchTerm, category, sortBy, isPremium } = req.query;
     // Fetch posts from the database using the params and query parameters
-    const result = yield post_service_1.PostServices.getAllPostFromDB(postId, userId, searchTerm, category, sortBy);
+    const result = yield post_service_1.PostServices.getAllPostFromDB(postId, userId, searchTerm, category, sortBy, isPremium);
     // Send response back to the client
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

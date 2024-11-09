@@ -35,7 +35,27 @@ const createCommentIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
     return yield comment_model_1.default.find();
 });
 const getAllCommentFromDB = (postId) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield comment_model_1.default.find({ postId }).populate("userId");
+    const result = yield comment_model_1.default.find({ postId }).populate("userId").sort({ createdAt: -1 });
+    // const result = await Comment.find().populate("userId").sort({ createdAt: -1 }); 
+    // const result = await Comment.aggregate([
+    //   { $match: { postId } },
+    //   {
+    //     $lookup: {
+    //       from: "posts",
+    //       localField: "postId",
+    //       foreignField: "_id",
+    //       as: "postId",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users", // Collection name for upvotes
+    //       localField: "userId",
+    //       foreignField: "_id",
+    //       as: "userId",
+    //     },
+    //   },
+    // ]).exec();
     return result;
 });
 const updateCommentIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {

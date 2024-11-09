@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const PostSchema = new mongoose_1.Schema({
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    category: { type: String, required: true },
-    isPremium: { type: Boolean, default: false },
+    title: { type: String },
+    content: { type: String },
+    category: { type: String },
+    isPremium: { type: Boolean },
     image: { type: String },
     upvotes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
     downvotes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],

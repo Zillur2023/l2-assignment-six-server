@@ -26,14 +26,42 @@ const createPostIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     const result = yield post_model_1.default.create(payload);
     return result;
 });
-const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteUnassociatedPosts = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Step 1: Get all user IDs and all post IDs
+        const allUserIds = yield user_model_1.User.find({ isDeleted: false }).select('_id').lean(); // Get all user IDs
+        const allPostIds = yield post_model_1.default.find().select('_id author').lean(); // Get all post IDs with their authors
+        // Extract user IDs from the array of user objects
+        const userIds = allUserIds.map(user => user._id.toString()); // Convert ObjectId to string for comparison
+        // Step 2: Filter posts that do not have an associated user ID
+        const postIdsToDelete = allPostIds
+            .filter(post => !userIds.includes(String(post === null || post === void 0 ? void 0 : post.author))) // Keep posts without a valid user
+            .map(post => post._id); // Get the IDs of those posts
+        // Step 3: Delete the unassociated posts
+        if (postIdsToDelete.length > 0) {
+            yield post_model_1.default.deleteMany({ _id: { $in: postIdsToDelete } });
+        }
+        else {
+        }
+    }
+    catch (error) {
+        console.error('Error deleting unassociated posts:', error);
+    }
+});
+const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy, isPremium // New parameter to specify premium filter
+) => __awaiter(void 0, void 0, void 0, function* () {
+    yield deleteUnassociatedPosts(); // Delete posts without associated users
     let result;
-    // Initialize the aggregation pipeline
     const pipeline = [];
-    // If postId is provided, fetch the specific post
+    // if (!isPremium) {
+    //   pipeline.push({ $match: { isPremium: { $ne: true } } });
+    // }
+    if (!postId && !isPremium) {
+        pipeline.push({ $match: { isPremium: { $ne: true } } });
+    }
     if (postId) {
+        // If postId is provided, fetch the specific post
         pipeline.push({ $match: { _id: new mongoose_1.default.Types.ObjectId(postId) } });
-        // await Post.find({_id: postId})
     }
     else if (userId) {
         // If userId is provided, fetch posts by that user
@@ -43,7 +71,13 @@ const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy) => __awa
         // If searchTerm is provided, search by title (case-insensitive)
         if (searchTerm) {
             pipeline.push({
-                $match: { title: { $regex: searchTerm, $options: "i" } }, // 'i' for case-insensitive
+                $match: {
+                    $or: [
+                        { title: { $regex: searchTerm, $options: "i" } },
+                        { category: { $regex: searchTerm, $options: "i" } },
+                        { content: { $regex: searchTerm, $options: "i" } }
+                    ]
+                }
             });
         }
         // If category is provided, filter by category
@@ -53,27 +87,19 @@ const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy) => __awa
             });
         }
     }
-    // Add fields to calculate the count of upvotes and downvotes
-    pipeline.push({
-        $addFields: {
-            upvoteCount: { $size: "$upvotes" }, // Calculate upvote count
-            downvoteCount: { $size: "$downvotes" }, // Calculate downvote count
-            commentCount: { $size: "$comments" }
-        },
-    });
-    // Perform lookups for populating author, upvotes, downvotes, and comments
+    // Lookup stages for author and comments
     pipeline.push({
         $lookup: {
-            from: "users", // Collection name for authors
+            from: "users",
             localField: "author",
             foreignField: "_id",
             as: "author",
         },
     }, {
         $unwind: {
-            path: "$author", // Unwind author array to get author object
-            preserveNullAndEmptyArrays: true // Allow posts without an author to be returned
-        }
+            path: "$author",
+            preserveNullAndEmptyArrays: true,
+        },
     }, {
         $lookup: {
             from: "users", // Collection name for upvotes
@@ -90,41 +116,43 @@ const getAllPostFromDB = (postId, userId, searchTerm, category, sortBy) => __awa
         },
     }, {
         $lookup: {
-            from: "comments", // Collection name for comments
+            from: "comments",
             localField: "comments",
             foreignField: "_id",
             as: "comments",
         },
     });
-    // Sorting options based on the sortBy parameter
+    // Execute the aggregation pipeline to get all posts
+    result = yield post_model_1.default.aggregate(pipeline).exec();
+    // Sorting based on upvotes and downvotes after fetching
     if (sortBy) {
-        let sortOption = {};
-        switch (sortBy) {
-            case "highestUpvotes":
-                sortOption = { upvoteCount: -1 }; // Sort by most upvotes (descending)
-                break;
-            case "lowestUpvotes":
-                sortOption = { upvoteCount: 1 }; // Sort by least upvotes (ascending)
-                break;
-            case "highestDownvotes":
-                sortOption = { downvoteCount: -1 }; // Sort by most downvotes (descending)
-                break;
-            case "lowestDownvotes":
-                sortOption = { downvoteCount: 1 }; // Sort by least downvotes (ascending)
-                break;
-            default:
-                sortOption = { upvoteCount: -1 }; // Default sorting
-                break;
-        }
-        // Add sort stage to the pipeline
-        pipeline.push({ $sort: sortOption });
+        result.sort((a, b) => {
+            const upvoteCountA = a.upvotes ? a.upvotes.length : 0;
+            const upvoteCountB = b.upvotes ? b.upvotes.length : 0;
+            const downvoteCountA = a.downvotes ? a.downvotes.length : 0;
+            const downvoteCountB = b.downvotes ? b.downvotes.length : 0;
+            switch (sortBy) {
+                case "highestUpvotes":
+                    return upvoteCountB - upvoteCountA; // Sort descending
+                case "lowestUpvotes":
+                    return upvoteCountA - upvoteCountB; // Sort ascending
+                case "highestDownvotes":
+                    return downvoteCountB - downvoteCountA; // Sort descending
+                case "lowestDownvotes":
+                    return downvoteCountA - downvoteCountB; // Sort ascending
+                default:
+                    return 0;
+            }
+        });
     }
     else {
-        // Default sorting by most upvotes if no sortBy is specified
-        pipeline.push({ $sort: { upvoteCount: -1 } });
+        // Default sort by highest upvotes if no sort option is provided
+        result.sort((a, b) => {
+            const upvoteCountA = a.upvotes ? a.upvotes.length : 0;
+            const upvoteCountB = b.upvotes ? b.upvotes.length : 0;
+            return upvoteCountB - upvoteCountA; // Sort by upvotes descending
+        });
     }
-    // Execute the aggregation pipeline
-    result = yield post_model_1.default.aggregate(pipeline).exec();
     return result;
 });
 const updateUpvotesIntoDB = (userId, postId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -151,15 +179,17 @@ const updateUpvotesIntoDB = (userId, postId) => __awaiter(void 0, void 0, void 0
     // Check if the user has already downvoted (they should not be allowed to upvote if so)
     const hasDownvoted = post.downvotes.some((downvoteId) => downvoteId.equals(userObjectId));
     if (hasDownvoted) {
-        throw new AppError_1.default(http_status_1.default.FORBIDDEN, "You cannot upvote after downvoting. Remove downvote first.");
-    }
-    if (hasUpvoted) {
-        // If already upvoted, remove the upvote
-        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { upvotes: userObjectId } }, { new: true });
+        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { downvotes: userObjectId } }, { new: true });
     }
     else {
-        // Add the upvote
-        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $addToSet: { upvotes: userObjectId } }, { new: true });
+        if (hasUpvoted) {
+            // If already upvoted, remove the upvote
+            yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { upvotes: userObjectId } }, { new: true });
+        }
+        else {
+            // Add the upvote
+            yield post_model_1.default.findByIdAndUpdate(postObjectId, { $addToSet: { upvotes: userObjectId } }, { new: true });
+        }
     }
     return post_model_1.default.findById(postObjectId); // Return the updated post
 });
@@ -188,15 +218,18 @@ const updateDownvotesIntoDB = (userId, postId) => __awaiter(void 0, void 0, void
     // Check if the user has already upvoted (they should not be allowed to downvote if so)
     const hasUpvoted = post.upvotes.some((upvoteId) => upvoteId.equals(userObjectId));
     if (hasUpvoted) {
-        throw new AppError_1.default(http_status_1.default.FORBIDDEN, "You cannot downvote after upvoting. Remove upvote first.");
-    }
-    if (hasDownvoted) {
-        // If already downvoted, remove the downvote
-        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { downvotes: userObjectId } }, { new: true });
+        // throw new AppError(httpStatus.FORBIDDEN, "You cannot downvote after upvoting. Remove upvote first.");
+        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { upvotes: userObjectId } }, { new: true });
     }
     else {
-        // Add the downvote
-        yield post_model_1.default.findByIdAndUpdate(postObjectId, { $addToSet: { downvotes: userObjectId } }, { new: true });
+        if (hasDownvoted) {
+            // If already downvoted, remove the downvote
+            yield post_model_1.default.findByIdAndUpdate(postObjectId, { $pull: { downvotes: userObjectId } }, { new: true });
+        }
+        else {
+            // Add the downvote
+            yield post_model_1.default.findByIdAndUpdate(postObjectId, { $addToSet: { downvotes: userObjectId } }, { new: true });
+        }
     }
     return post_model_1.default.findById(postObjectId); // Return the updated post
 });
@@ -238,41 +271,6 @@ const deletePostFromDB = (postId) => __awaiter(void 0, void 0, void 0, function*
     }
     return result;
 });
-// const isAvailableForVerifiedIntoDB = async (id: string) => {
-//   const user = await User.findById(id);
-//   if (!user) {
-//     throw new AppError(httpStatus.NOT_FOUND, "User not found");
-//   }
-//   // Query 1: Find posts with upvotes that include the user
-//   const postsWithUserUpvoted = await Post.find({
-//     author: id,
-//     // $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-//     // upvotes: { $elemMatch: { $eq: user._id } } 
-//   }).select("upvotes");
-//     // Flatten the upvotes from all posts into a single array
-//     const allUpvotes = postsWithUserUpvoted.flatMap((post) => post.upvotes);
-//   // If there are more than 1 post where the user has been upvoted, return true
-//   // if (postsWithUserUpvoted.length > 1) {
-//   //   return true;
-//   // } else {
-//   //   if (postsWithUserUpvoted.length > 0) {
-//   //     return true
-//   //   }
-//   // }
-//   // // Query 2: Find posts with upvotes but the user is not in the upvotes array
-//   // const postsWithoutUserUpvoted = await Post.find({
-//   //   author: id,
-//   //   $expr: { $gt: [{ $size: "$upvotes" }, 0] },
-//   //   upvotes: { $not: { $elemMatch: { $eq: user._id } } } // User is not in the upvotes array
-//   // });
-//   // // If there are any such posts, return true
-//   // if (postsWithoutUserUpvoted.length > 0) {
-//   //   return true;
-//   // }
-//   // Otherwise, return false
-//   // return false;
-//   return postsWithUserUpvoted; 
-// };
 const isAvailableForVerifiedIntoDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findById(id);
     if (!user) {
@@ -297,29 +295,3 @@ exports.PostServices = {
     deletePostFromDB,
     isAvailableForVerifiedIntoDB
 };
-// const getAllPostFromDB = async (postId?: string, userId?: string) => {
-//   let result;
-//   if (postId) {
-//     // If postId is provided, fetch the specific post
-//     result = await Post.find({ _id: postId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else if (userId) {
-//     // If userId is provided, fetch posts by that user
-//     result = await Post.find({ author: userId })
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   } else {
-//     // If neither postId nor userId is provided, fetch all posts
-//     result = await Post.find()
-//       .populate("author")
-//       .populate("upvotes")
-//       .populate("downvotes")
-//       .populate("comments");
-//   }
-//   return result;
-// };

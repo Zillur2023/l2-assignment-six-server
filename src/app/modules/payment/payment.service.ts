@@ -42,7 +42,8 @@ const createPaymentIntoDB = async (id: string, transactionId:string, status: str
       }
 
       // Load the HTML template
-      const filePath = join(__dirname, '../../../views/confirmation.html');
+    //   const filePath = join(__dirname, '../../../views/confirmation.html');
+      const filePath = join(__dirname, '../../../../public/confirmation.html');
       let template = readTemplate(filePath);
 
       // Replace placeholders in the HTML template

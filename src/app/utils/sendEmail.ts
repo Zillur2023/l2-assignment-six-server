@@ -8,7 +8,7 @@ export const sendEmail = async (to: string, html: string) => {
     secure: config.NODE_ENV === 'production', // Use TLS in production
     auth: {
       user: 'zillurrahmanbd12@gmail.com',
-      pass: config.send_email_secret,
+      pass: config.send_email_secret
     },
   });
 
@@ -20,7 +20,6 @@ export const sendEmail = async (to: string, html: string) => {
       text: '', // plain text body
       html, // HTML body
     });
-    console.log(`Email sent to ${to}`);
   } catch (error) {
     console.error(`Error sending email: ${error}`);
   }

@@ -86,16 +86,6 @@ const updateFollowAndUnfollow = (0, catchAsync_1.default)((req, res) => __awaite
         data: result,
     });
 }));
-const isAvailableForVerified = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const result = yield user_service_1.UserServices.isAvailableForVerifiedIntoDB(id);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: 'Available for verified successfully',
-        data: result,
-    });
-}));
 const updateVeirfied = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield user_service_1.UserServices.updateVerifiedIntoDB(id);
@@ -103,6 +93,16 @@ const updateVeirfied = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'Verified update successfully',
+        data: result,
+    });
+}));
+const deleteUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield user_service_1.UserServices.deleteUserFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'User deleted successfully',
         data: result,
     });
 }));
@@ -114,6 +114,6 @@ exports.UserControllers = {
     updateUserProfile,
     updateFollowers,
     updateFollowAndUnfollow,
-    isAvailableForVerified,
     updateVeirfied,
+    deleteUser
 };

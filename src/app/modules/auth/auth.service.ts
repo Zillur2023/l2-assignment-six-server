@@ -109,9 +109,9 @@ const changePassword = async (
     Number(config.bcrypt_salt_rounds),
   );
 
-  await User.findOneAndUpdate(
+  const result = await User.findOneAndUpdate(
     {
-      id: user?.email,
+      email: user?.email,
       role: user?.role,
     },
     {
@@ -121,7 +121,7 @@ const changePassword = async (
     },
   );
 
-  return null;
+  return result;
 };
 
 const refreshToken = async (token: string) => {
@@ -173,10 +173,10 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const forgetPassword = async (payload: any) => {
+const forgetPassword = async (payload: { email : string }) => {
   // checking if the user is exist
-  // console.log({payload})
   const user = await User.findOne({email: payload?.email});
+ 
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
@@ -209,10 +209,12 @@ const forgetPassword = async (payload: any) => {
   );
 
 
-  console.log({resetToken})
 
   // const resetUILink = `${config.reset_pass_ui_link}?id=${user.id}&token=${resetToken} `;
-  const resetUILink = `http://localhost:3000/reset-password?email=${user?.email}&token=${resetToken} `;
+  const resetUILink = `${config.client_url}/reset-password?email=${user?.email}&token=${resetToken} `;
+
+  console.log("forgetPassUser",user)
+  console.log({resetUILink})
 
   const email = sendEmail(user.email, resetUILink);
 
@@ -220,7 +222,6 @@ const forgetPassword = async (payload: any) => {
     throw new AppError(httpStatus.NON_AUTHORITATIVE_INFORMATION, "Failed to send email ")
   }
 
-  // console.log(resetUILink);
 
   return resetUILink
 };
@@ -229,7 +230,6 @@ const resetPassword = async (
   payload: { email: string; newPassword: string; token: string, },
   
 ) => {
-  console.log("resetPassword payload  ", payload)
 
   // checking if the user is exist
   const user = await User.findOne({email: payload?.email});
@@ -256,12 +256,9 @@ const resetPassword = async (
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
-  // console.log({decoded})
 
-  //localhost:3000?id=A-0001&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJBLTAwMDEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDI4NTA2MTcsImV4cCI6MTcwMjg1MTIxN30.-T90nRaz8-KouKki1DkCSMAbsHyb9yDi0djZU3D6QO4
 
   if (payload?.email !== decoded?.email) {
-    console.log(payload?.email, decoded?.email);
     throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!');
   }
 
@@ -272,7 +269,6 @@ const resetPassword = async (
     Number(config.bcrypt_salt_rounds),
   );
   // const newHashedPassword= payload?.newPassword
-  console.log({newHashedPassword})
 
    const result = await User.findOneAndUpdate(
     {
@@ -286,7 +282,6 @@ const resetPassword = async (
     },{ new: true } 
   );
 
-  // console.log({result})
 };
 export const AuthServices = {
   loginUser,

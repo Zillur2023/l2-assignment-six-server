@@ -23,6 +23,13 @@ exports.userSchema = new mongoose_1.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    needsPasswordChange: {
+        type: Boolean,
+        default: true,
+    },
+    passwordChangedAt: {
+        type: Date,
+    },
     bio: { type: String },
     image: { type: String },
     followers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User", default: [] }],
@@ -66,11 +73,6 @@ exports.userSchema.post("save", function (doc, next) {
     doc.password = "";
     next();
 });
-exports.userSchema.statics.isUserExistsByEmail = function (email) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield exports.User.findOne({ email }).select("+password");
-    });
-};
 exports.userSchema.statics.isPasswordMatched = function (plainTextPassword, hashedPassword) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield bcrypt_1.default.compare(plainTextPassword, hashedPassword);

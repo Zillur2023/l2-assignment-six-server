@@ -10,20 +10,39 @@ import AppError from "../../errors/AppError";
 const loginUser = catchAsync(async (req, res) => {
     const result = await AuthServices.loginUser(req.body);
     const { user,refreshToken, accessToken } = result;
-    console.log({accessToken})
   
-    res.cookie('accessToken', accessToken, {
-      secure: config.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true,
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    });
-    res.cookie('refreshToken', refreshToken, {
-      secure: config.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true,
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   secure: config.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   // sameSite: true,
+    //   // maxAge: 1000 * 60 * 60 * 24 * 365,
+    // });
+    // res.cookie('refreshToken', refreshToken, {
+    //   secure: config.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   // sameSite: true,
+    //   // maxAge: 1000 * 60 * 60 * 24 * 365,
+    // });
+    const isProduction = config.NODE_ENV === 'production';
+
+res.cookie('accessToken', accessToken, {
+  secure: true, // Use HTTPS in production
+  httpOnly: true, // Prevent client-side access
+  sameSite: true, // Helps with CSRF protection
+  maxAge: 1000 * 60 * 15, // 15 minutes
+  // domain: isProduction ? '.vercel.app' : 'localhost', 
+  path: '/',
+});
+
+res.cookie('refreshToken', refreshToken, {
+  secure: true,
+  httpOnly: true,
+  sameSite: true,
+  maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+  // domain: isProduction ? '.vercel.app' : 'localhost',
+  path: '/',
+});
+
   
     sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -42,7 +61,7 @@ const loginUser = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Password is updated succesfully!',
+      message: 'Password is changed succesfully!',
       data: result,
     });
   });
@@ -55,11 +74,12 @@ const loginUser = catchAsync(async (req, res) => {
 
     // Set the updated access token in the cookies
     res.cookie('accessToken', accessToken, {
-        secure: config.NODE_ENV === 'production', // Use secure cookies in production
-        httpOnly: true, // Prevent access from JavaScript (for security)
-        sameSite: true, // Set appropriate SameSite attribute (usually 'strict' or 'lax')
-        maxAge: 1000 * 60 * 60 * 24 * 365, // Set cookie expiration
+        secure: config.NODE_ENV === 'production', 
+        httpOnly: true, 
+        // sameSite: true, 
+        // maxAge: 1000 * 60 * 60 * 24 * 365, 
     });
+
   
     sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -76,7 +96,7 @@ const loginUser = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Reset link is generated succesfully!',
+      message: 'Reset link is generated succesfully! ---> Check your email and reset password',
       data: result,
     });
   });
@@ -84,7 +104,6 @@ const loginUser = catchAsync(async (req, res) => {
   const resetPassword = catchAsync(async (req, res) => {
 
     // const token = req.headers.authorization;
-    //  console.log('resetPassword controller',token)
     // if (!token) {
     //   throw new AppError(httpStatus.BAD_REQUEST, 'Something went wrong !');
     // }

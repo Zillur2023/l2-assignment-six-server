@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const user_route_1 = require("../modules/user/user.route");
-const auth_route_1 = require("../modules/auth/auth.route");
 const post_route_1 = require("../modules/post/post.route");
 const comment_route_1 = require("../modules/comment/comment.route");
 const payment_route_1 = require("../modules/payment/payment.route");
+const auth_route_1 = require("../modules/auth/auth.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -26,7 +26,11 @@ const moduleRoutes = [
     },
     {
         path: "/payment",
-        route: payment_route_1.PaymentRoutes,
+        route: payment_route_1.PaymentRouters,
+    },
+    {
+        path: '/auth',
+        route: auth_route_1.AuthRouters,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
